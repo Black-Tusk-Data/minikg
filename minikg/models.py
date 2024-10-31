@@ -1,7 +1,9 @@
 from pathlib import Path
 from typing import NamedTuple
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from minikg.utils import scrub_title_key
 
 
 class MiniKgConfig(NamedTuple):
@@ -22,8 +24,32 @@ class FileFragment(BaseModel):
     pass
 
 
-class Entity(BaseModel):
-    name: str                   # unique!
-    labels: list[str]
-    description: str
+class CompletionShape(BaseModel):
+    def get_json_schema(self) -> dict:
+        """
+        Can override to assert things as 'enum'.
+        """
+        raw = self.model_json_schema()
+        return scrub_title_key(raw)
+    pass
+
+
+class Entity(CompletionShape):
+    name: str = Field(
+        description="Name of the entity"
+    )
+    labels: list[str] = Field(
+        description="Applicable labels"
+    )
+    description: str = Field(
+        description="A short description of the entity"
+    )
+    pass
+
+
+class EntityRelationship(CompletionShape):
+    entity_a: str
+    entity_b: str
+    name: str
+    weight: float
     pass

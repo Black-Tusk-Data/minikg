@@ -1,11 +1,11 @@
 from typing import Type
 from pydantic import BaseModel
 from minikg.extractor.base_extractor import BaseExtractor
-from minikg.models import Entity
+from minikg.models import CompletionShape, Entity
 
 
 class EntityExtractor(BaseExtractor[Entity]):
-    def _get_output_shape(self) -> Type[BaseModel]:
+    def _get_llm_output_shape(self) -> Type[CompletionShape]:
         return Entity
 
     def _get_user_prompt_lines(self) -> list[str]:
