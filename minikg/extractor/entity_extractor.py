@@ -1,7 +1,7 @@
 from typing import Type
 from pydantic import BaseModel
 from minikg.extractor.base_extractor import BaseExtractor
-from minikg.models import Entity, FileFragment
+from minikg.models import Entity
 
 
 class EntityExtractor(BaseExtractor[Entity]):
