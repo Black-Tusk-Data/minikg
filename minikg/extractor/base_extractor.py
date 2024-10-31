@@ -25,12 +25,23 @@ class BaseExtractor(Generic[T], abc.ABC):
         pass
 
     @abc.abstractmethod
-    def _get_system_prompt_lines(self) -> list[str]:
-        pass
-
-    @abc.abstractmethod
     def _get_user_prompt_lines(self) -> list[str]:
         pass
+
+    def _get_fragment_contents(self) -> str:
+        with open(self.fragment.source_path) as f:
+            lines = f.readlines()
+            text = "".join(lines[
+                self.fragment.start_line_incl:
+                self.fragment.end_line_excl
+            ])
+            return text
+        pass
+
+    def _get_system_prompt_lines(self) -> list[str]:
+        return [
+            f"You are a {self.config.knowledge_domain} expert.",
+        ]
 
     def _get_system_prompt(self) -> str:
         return "\n".join(self._get_system_prompt_lines())
