@@ -1,3 +1,7 @@
+"""
+ - Could include some few-shot examples
+"""
+
 from pathlib import Path
 from typing import NamedTuple
 
@@ -47,8 +51,16 @@ class Entity(CompletionShape):
 
 
 class EntityRelationship(CompletionShape):
-    entity_a: str
-    entity_b: str
-    name: str
-    weight: float
+    source_entity: str = Field(
+        description="Name of the source entity in the relationship",
+    )
+    target_entity: str = Field(
+        description="Name of the target entity in the relationship",
+    )
+    relationship_description: str = Field(
+        description="A description of why the source and target entities are related",
+    )
+    weight: int = Field(
+        description="An integer score between 1 and 10 indicating the strength of the relationship between the source and target entities"
+    )
     pass

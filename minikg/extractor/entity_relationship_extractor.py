@@ -14,8 +14,8 @@ class EntityRelationshipExtractor(BaseExtractor[EntityRelationship]):
         raw = EntityRelationship.prompt_json_schema()
         # set the enums!
         entity_names = [entity.name for entity in self.entities]
-        raw["entity_a"]["enum"] = entity_names
-        raw["entity_b"]["enum"] = entity_names
+        raw["properties"]["entity_a"]["enum"] = entity_names
+        raw["properties"]["entity_b"]["enum"] = entity_names
         return raw
 
     def _get_entity_blurb(self, entity: Entity) -> str:
@@ -30,7 +30,7 @@ class EntityRelationshipExtractor(BaseExtractor[EntityRelationship]):
     def _get_user_prompt_lines(self) -> list[str]:
         return [
             "-GOAL-",
-            "Given a text document that is potentially relevant to this activity, identify all the meaningful relatinoships between the entities identified.",
+            "Given a text document that is potentially relevant to this activity and a list of entity types, identify all the meaningful relationships between those entities.",
             "-ENTITIES-",
             self._get_all_entities_blurb(),
             "-TEXT-",
