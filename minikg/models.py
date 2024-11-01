@@ -27,7 +27,7 @@ class FileFragment(BaseModel):
 class CompletionShape(BaseModel):
 
     @classmethod
-    def prompt_json_schema(cls) -> dict:
+    def prompt_json_schema(cls: type["CompletionShape"]) -> dict:
         raw = cls.model_json_schema()
         return scrub_title_key(raw)
     pass

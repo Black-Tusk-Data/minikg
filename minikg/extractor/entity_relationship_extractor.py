@@ -10,8 +10,13 @@ class EntityRelationshipExtractor(BaseExtractor[EntityRelationship]):
         self.entities = entities
         return
 
-    def _get_llm_output_shape(self) -> Type[CompletionShape]:
-        return EntityRelationship
+    def _get_llm_output_shape(self) -> dict:
+        raw = EntityRelationship.prompt_json_schema()
+        # set the enums!
+        entity_names = [entity.name for entity in self.entities]
+        raw["entity_a"]["enum"] = entity_names
+        raw["entity_b"]["enum"] = entity_names
+        return raw
 
     def _get_entity_blurb(self, entity: Entity) -> str:
         return f"'{entity.name}' - {entity.description}"
