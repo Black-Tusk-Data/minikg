@@ -25,11 +25,10 @@ class FileFragment(BaseModel):
 
 
 class CompletionShape(BaseModel):
-    def get_json_schema(self) -> dict:
-        """
-        Can override to assert things as 'enum'.
-        """
-        raw = self.model_json_schema()
+
+    @classmethod
+    def prompt_json_schema(cls) -> dict:
+        raw = cls.model_json_schema()
         return scrub_title_key(raw)
     pass
 

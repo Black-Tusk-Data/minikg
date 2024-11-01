@@ -5,7 +5,7 @@ from minikg.models import CompletionShape, Entity
 
 
 class EntityExtractor(BaseExtractor[Entity]):
-    def _get_llm_output_shape(self) -> Type[CompletionShape]:
+    def _get_llm_output_shape(self) -> dict:
         return Entity
 
     def _get_user_prompt_lines(self) -> list[str]:

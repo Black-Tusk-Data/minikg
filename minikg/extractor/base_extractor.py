@@ -21,7 +21,7 @@ class BaseExtractor(Generic[T], abc.ABC):
         return
 
     @abc.abstractmethod
-    def _get_llm_output_shape(self) -> Type[BaseModel]:
+    def _get_llm_output_shape(self) -> dict:
         pass
 
     @abc.abstractmethod
