@@ -3,7 +3,7 @@
 """
 
 from pathlib import Path
-from typing import NamedTuple
+from typing import Literal, NamedTuple
 
 from pydantic import BaseModel, Field
 
@@ -15,9 +15,27 @@ class MiniKgConfig(NamedTuple):
     persist_dir: Path
     max_chunk_lines: int
     chunk_overlap_lines: int
-
-    # def get_
     pass
+
+
+class MiniKgBuildPlanStepInput(NamedTuple):
+    build_doc_graph: None | Path
+    merge_doc_graphs: None | tuple[Path, Path]
+    pass
+
+
+class MiniKgBuildPlanStep(NamedTuple):
+    type: Literal[
+        "build_doc_graph",
+        "merge_doc_graphs",
+    ]
+    input: MiniKgBuildPlanStepInput
+
+    pass
+
+# class MiniKgBuildPlan(NamedTuple):
+#     steps: list[MiniKgBuildPlanStep]
+#     pass
 
 
 class FileFragment(BaseModel):
