@@ -2,6 +2,7 @@
  - Could include some few-shot examples
 """
 
+import abc
 from pathlib import Path
 from typing import Literal, NamedTuple
 
@@ -18,24 +19,36 @@ class MiniKgConfig(NamedTuple):
     pass
 
 
-class MiniKgBuildPlanStepInput(NamedTuple):
-    build_doc_graph: None | Path
-    merge_doc_graphs: None | tuple[Path, Path]
-    pass
+# class MiniKgBuildPlanStepInput(NamedTuple):
+#     build_doc_graph: None | Path
+#     merge_doc_graphs: None | tuple[Path, Path]
+#     pass
 
 
-class MiniKgBuildPlanStep(NamedTuple):
-    type: Literal[
-        "build_doc_graph",
-        "merge_doc_graphs",
-    ]
-    input: MiniKgBuildPlanStepInput
+# class MiniKgBuildPlanStep(NamedTuple):
+#     type: Literal[
+#         "build_doc_graph",
+#         "merge_doc_graphs",
+#     ]
+#     input: MiniKgBuildPlanStepInput
 
-    pass
+#     pass
 
 # class MiniKgBuildPlan(NamedTuple):
 #     steps: list[MiniKgBuildPlanStep]
 #     pass
+
+
+class MiniKgBuildPlanStepOutput(abc.ABC):
+    @abc.abstractmethod
+    def to_raw(self) -> bytes:
+        pass
+
+    @abc.abstractmethod
+    @staticmethod
+    def from_raw() -> "MiniKgBuildPlanStepOutput":
+        pass
+    pass
 
 
 class FileFragment(BaseModel):
