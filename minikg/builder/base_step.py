@@ -1,14 +1,35 @@
 import abc
+from typing import Generic, TypeVar
 from minikg.models import MiniKgConfig
 
 
-class MiniKgBuilderStep(abc.ABC):
+T = TypeVar("T")
+
+class MiniKgBuilderStep(Generic[T], abc.ABC):
     def __init__(
             self,
             config: MiniKgConfig,
     ):
         self.config = config
+        self.executed = False
+        self.output: None | T = None
         return
+
+    def execute(self) -> None:
+        if self.executed:
+            this_id = self.get_id()
+            raise Exception(f"Step {this_id} has already executed")
+        self._execute()
+        pass
+
+    def get_output(self) -> T:
+        assert self.executed
+        assert self.output != None
+        return self.output
+
+    @abc.abstractmethod
+    def _execute(self) -> None:
+        pass
 
     @abc.abstractmethod
     def get_id(self) -> str:
@@ -17,9 +38,15 @@ class MiniKgBuilderStep(abc.ABC):
         """
         pass
 
+    @classmethod
+    def load_from_raw(cls: type["MiniKgBuilderStep"], raw: bytes) -> "MiniKgBuilderStep":
+        loaded = cls._load_from_raw(raw)
+        loaded.executed = True
+        return loaded
+
     @abc.abstractmethod
-    @staticmethod
-    def load_from_raw(raw: bytes) -> "MiniKgBuilderStep":
+    @classmethod
+    def _load_from_raw(cls: type["MiniKgBuilderStep"], raw: bytes) -> "MiniKgBuilderStep":
         pass
 
     @abc.abstractmethod
