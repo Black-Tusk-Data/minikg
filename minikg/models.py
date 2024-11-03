@@ -3,9 +3,12 @@
 """
 
 import abc
+import base64
+import json
 from pathlib import Path
 from typing import Literal, NamedTuple
 
+import networkx as nx
 from pydantic import BaseModel, Field
 
 from minikg.utils import scrub_title_key
@@ -28,6 +31,48 @@ class MiniKgBuildPlanStepOutput(abc.ABC):
     @staticmethod
     def from_file(path: Path) -> "MiniKgBuildPlanStepOutput":
         pass
+    pass
+
+
+class BuildStepOutput_Graph(MiniKgBuildPlanStepOutput):
+    def __init__(
+            self,
+            *,
+            label: str,
+            G: nx.Graph,
+    ):
+        self.label = label
+        self.G = G
+        return
+
+    def to_file(self, path: Path) -> None:
+        graph6_bytes = nx.to_graph6_bytes(self.G)
+        json_data = json.dumps({
+            "label": self.label,
+            "graph6_b64": base64.b64encode(
+                graph6_bytes
+            ).decode("utf-8"),
+        })
+        with open(path, "w") as f:
+            f.write(json_data)
+            pass
+        return
+
+    @staticmethod
+    def from_file(path: Path) -> "BuildStepOutput_Graph":
+        data: dict
+        with open(path, "r") as f:
+            data = json.loads(f.read())
+            pass
+
+        graph6_bytes = base64.b64decode(
+            data["graph6_b64"]
+        )
+        return BuildStepOutput_Graph(
+            G=nx.from_graph6_bytes(graph6_bytes),
+            label=data["label"],
+        )
+
     pass
 
 

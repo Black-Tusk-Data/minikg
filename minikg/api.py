@@ -53,8 +53,9 @@ class Api:
 
         # merge doc KGs
         graphs_to_merge = deque([
-            step.output         # TODO: probably needs to ref something deeper on the output
+            step.output
             for step in extract_doc_kg_steps
+            if step.output      # for typing
         ])
         while 2 <= len(graphs_to_merge):
             merge_tasks: list[Step_MergeKgs] = []
