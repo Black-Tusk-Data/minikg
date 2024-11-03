@@ -1,5 +1,7 @@
 import abc
-from typing import Generic, TypeVar
+import logging
+from pathlib import Path
+from typing import Generic, Type, TypeVar
 from minikg.models import MiniKgBuildPlanStepOutput, MiniKgConfig
 
 
@@ -9,28 +11,59 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
     def __init__(
             self,
             config: MiniKgConfig,
+            *,
+            ignore_cache: bool = False
     ):
         self.config = config
         self.executed = False
         self.output: None | T = None
+        self.ignore_cache = ignore_cache
         return
+
+    def _get_cache_output_path(self) -> Path:
+        clsname = self.__class__.__name__
+        return self.config.persist_dir / clsname / self.get_id()
 
     def _write_output_to_cache(self):
         output = self.get_output()
-        clsname = self.__class__.__name__
-        output_path = self.config.persist_dir / clsname / self.get_id()
-        with open(output_path, "wb") as f:
-            f.write(output.to_raw())
-            pass
+        output_path = self._get_cache_output_path()
+        output.to_file(output_path)
         return
+
+    def _get_cached_output(self) -> T | None:
+        cached_output_path = self._get_cache_output_path()
+        if not cached_output_path.exists():
+            return None
+        output_type = self.__class__.get_output_type()
+        try:
+            return output_type.from_file(
+                cached_output_path
+            )
+        except Exception as e:
+            logging.error(
+                "Failed to load cached KG build step from %s: %s",
+                cached_output_path, e
+            )
+            pass
+        return None
 
     def execute(self) -> None:
         if self.executed:
             this_id = self.get_id()
             raise Exception(f"Step {this_id} has already executed")
+
+        cached_output = self._get_cached_output()
+        if not self.ignore_cache and cached_output:
+            logging.debug(
+                "Using cached KG build step %s",
+                self.get_id(),
+            )
+            self.output = cached_output
+            return
+
         self._execute()
         self._write_output_to_cache()
-        pass
+        return
 
     def get_output(self) -> T:
         assert self.executed
@@ -39,6 +72,11 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
 
     @abc.abstractmethod
     def _execute(self) -> None:
+        pass
+
+    @abc.abstractmethod
+    @staticmethod
+    def get_output_type() -> Type[T]:
         pass
 
     @abc.abstractmethod

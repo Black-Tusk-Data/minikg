@@ -19,34 +19,14 @@ class MiniKgConfig(NamedTuple):
     pass
 
 
-# class MiniKgBuildPlanStepInput(NamedTuple):
-#     build_doc_graph: None | Path
-#     merge_doc_graphs: None | tuple[Path, Path]
-#     pass
-
-
-# class MiniKgBuildPlanStep(NamedTuple):
-#     type: Literal[
-#         "build_doc_graph",
-#         "merge_doc_graphs",
-#     ]
-#     input: MiniKgBuildPlanStepInput
-
-#     pass
-
-# class MiniKgBuildPlan(NamedTuple):
-#     steps: list[MiniKgBuildPlanStep]
-#     pass
-
-
 class MiniKgBuildPlanStepOutput(abc.ABC):
     @abc.abstractmethod
-    def to_raw(self) -> bytes:
+    def to_file(self, path: Path) -> None:
         pass
 
     @abc.abstractmethod
     @staticmethod
-    def from_raw() -> "MiniKgBuildPlanStepOutput":
+    def from_file(path: Path) -> "MiniKgBuildPlanStepOutput":
         pass
     pass
 
