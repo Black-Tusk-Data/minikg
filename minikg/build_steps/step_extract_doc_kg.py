@@ -1,5 +1,5 @@
 from pathlib import Path
-from minikg.builder.base_step import MiniKgBuilderStep
+from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.models import MiniKgConfig
 
 
