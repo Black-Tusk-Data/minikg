@@ -27,13 +27,12 @@ class Step_SplitDoc(MiniKgBuilderStep[BuildStepOutput_Chunks]):
     def get_output_type():
         return BuildStepOutput_Chunks
 
-    def _execute(self):
+    def _execute(self) -> BuildStepOutput_Chunks:
         chunks = self.splitter.split_file(self.doc_path)
         logging.debug(
             "split %s into %d chunks",
             self.doc_path,
             len(chunks),
         )
-        self.output = BuildStepOutput_Chunks(chunks=chunks)
-        return
+        return BuildStepOutput_Chunks(chunks=chunks)
     pass

@@ -54,7 +54,6 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
         return None
 
     def execute(self) -> None:
-        logging.info("EXECUTING")
         if self.executed:
             this_id = self.get_id()
             raise Exception(f"Step {this_id} has already executed")
@@ -66,12 +65,11 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
                 self.get_id(),
             )
             self.output = cached_output
+            self.executed = True
             return
 
-        logging.info("begin executing")
-        self._execute()
+        self.output = self._execute()
         self.executed = True
-        logging.info("done executing")
         self._write_output_to_cache()
         return
 
@@ -81,7 +79,7 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
         return self.output
 
     @abc.abstractmethod
-    def _execute(self) -> None:
+    def _execute(self) -> T:
         pass
 
     @staticmethod

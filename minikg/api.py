@@ -1,5 +1,6 @@
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 import logging
 import os
 from pathlib import Path
@@ -11,9 +12,9 @@ from minikg.build_steps.step_split_doc import Step_SplitDoc
 from minikg.models import MiniKgConfig
 
 
-def execute_step(step: MiniKgBuilderStep) -> None:
+def execute_step(step: MiniKgBuilderStep) -> MiniKgBuilderStep:
     step.execute()
-    return
+    return step
 
 
 class StepExecutor:
@@ -35,9 +36,9 @@ class StepExecutor:
             steps[0].__class__.__name__,
         )
         with ProcessPoolExecutor(max_workers=self.MAX_CONCURRENCY) as ex:
-            _ = list(ex.map(execute_step, steps))
-            pass
-        return
+            completed_steps = list(ex.map(execute_step, steps))
+            return completed_steps
+        pass
 
 
 class Api:
@@ -77,7 +78,7 @@ class Api:
             )
             for doc_path in source_paths
         ]
-        self.executor.execute_all(split_doc_steps)
+        split_doc_steps = self.executor.execute_all(split_doc_steps)
 
         logging.info("extracting chunk-level knowledge graphs")
         extract_chunk_kg_steps = [
