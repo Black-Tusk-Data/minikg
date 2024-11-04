@@ -6,6 +6,7 @@ import abc
 import base64
 import json
 from pathlib import Path
+import re
 from typing import Literal, NamedTuple
 
 import networkx as nx
@@ -17,6 +18,8 @@ from minikg.utils import scrub_title_key
 class MiniKgConfig(NamedTuple):
     knowledge_domain: str       # like 'sales calls'
     persist_dir: Path
+    input_dir: Path
+    input_file_exp: str
     max_chunk_lines: int
     chunk_overlap_lines: int
     pass
@@ -44,8 +47,8 @@ class MiniKgBuildPlanStepOutput(abc.ABC):
     def to_file(self, path: Path) -> None:
         pass
 
-    @abc.abstractmethod
     @staticmethod
+    @abc.abstractmethod
     def from_file(path: Path) -> "MiniKgBuildPlanStepOutput":
         pass
     pass

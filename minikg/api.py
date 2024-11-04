@@ -1,6 +1,7 @@
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor
 import logging
+import os
 from pathlib import Path
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
@@ -37,12 +38,26 @@ class Api:
     ):
         self.config = config
         self.executor = StepExecutor(config)
+        for dirpath in [
+                config.persist_dir,
+        ]:
+            if not dirpath.exists():
+                os.makedirs(dirpath)
+                pass
+            pass
         return
 
-    def build_kg(
-            self,
-            source_paths: list[Path],
-    ) -> None:
+    def _gather_input_files(self) -> list[Path]:
+        return list(
+            self.config.input_dir.rglob(
+                self.config.input_file_exp
+            )
+        )
+
+    def build_kg(self) -> None:
+        source_paths = self._gather_input_files()
+        logging.info("found %d source files", len(source_paths))
+
         logging.info("splitting documents")
         # split docs
         split_doc_steps = [

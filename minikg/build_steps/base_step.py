@@ -74,8 +74,8 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
     def _execute(self) -> None:
         pass
 
-    @abc.abstractmethod
     @staticmethod
+    @abc.abstractmethod
     def get_output_type() -> Type[T]:
         pass
 
