@@ -28,6 +28,7 @@ class Step_ExtractChunkKg(MiniKgBuilderStep[BuildStepOutput_Graph]):
         # - read file
         # - run the KG extractor on it
         # - set the output to be a wrapped version of the NetworkX graph that handles reading / writing from disk
+        raise Exception("NOT READY!")
         graph_label = f"doc-{self.get_id()}"
         self.output = BuildStepOutput_Graph(
             G=nx.Graph(),

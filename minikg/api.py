@@ -11,6 +11,11 @@ from minikg.build_steps.step_split_doc import Step_SplitDoc
 from minikg.models import MiniKgConfig
 
 
+def execute_step(step: MiniKgBuilderStep) -> None:
+    step.execute()
+    return
+
+
 class StepExecutor:
     MAX_CONCURRENCY = 5         # arbitrary
 
@@ -22,10 +27,15 @@ class StepExecutor:
         return
 
     def execute_all(self, steps: list[MiniKgBuilderStep]):
+        if not steps:
+            return
+        logging.debug(
+            "executing %d steps of type %s",
+            len(steps),
+            steps[0].__class__.__name__,
+        )
         with ProcessPoolExecutor(max_workers=self.MAX_CONCURRENCY) as ex:
-            for step in steps:
-                ex.submit(lambda: step.execute)
-                pass
+            _ = list(ex.map(execute_step, steps))
             pass
         return
 

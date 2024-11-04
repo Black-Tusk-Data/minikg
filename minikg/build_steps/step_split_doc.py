@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import networkx as nx
@@ -28,6 +29,11 @@ class Step_SplitDoc(MiniKgBuilderStep[BuildStepOutput_Chunks]):
 
     def _execute(self):
         chunks = self.splitter.split_file(self.doc_path)
+        logging.debug(
+            "split %s into %d chunks",
+            self.doc_path,
+            len(chunks),
+        )
         self.output = BuildStepOutput_Chunks(chunks=chunks)
         return
     pass
