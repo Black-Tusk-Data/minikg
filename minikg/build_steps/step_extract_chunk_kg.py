@@ -3,7 +3,7 @@ from pathlib import Path
 import networkx as nx
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
-from minikg.models import BuildStepOutput_Graph, MiniKgConfig
+from minikg.models import BuildStepOutput_Graph, FileFragment, MiniKgConfig
 
 
 class Step_ExtractChunkKg(MiniKgBuilderStep[BuildStepOutput_Graph]):
@@ -11,16 +11,14 @@ class Step_ExtractChunkKg(MiniKgBuilderStep[BuildStepOutput_Graph]):
             self,
             config: MiniKgConfig,
             *,
-            chunk_id: str,
-            chunk_contents: str,
+            fragment: FileFragment
     ) -> None:
         super().__init__(config)
-        self.chunk_id = chunk_id
-        self.chunk_contents = chunk_contents
+        self.fragment = fragment
         return
 
     def get_id(self) -> str:
-        return self.chunk_id
+        return self.fragment.fragment_id
 
     @staticmethod
     def get_output_type():

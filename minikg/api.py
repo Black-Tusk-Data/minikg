@@ -1,10 +1,12 @@
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor
+import logging
 from pathlib import Path
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
-from minikg.build_steps.step_extract_doc_kg import Step_ExtractDocKg
+from minikg.build_steps.step_extract_chunk_kg import Step_ExtractChunkKg
 from minikg.build_steps.step_merge_kgs import Step_MergeKgs
+from minikg.build_steps.step_split_doc import Step_SplitDoc
 from minikg.models import MiniKgConfig
 
 
@@ -41,20 +43,32 @@ class Api:
             self,
             source_paths: list[Path],
     ) -> None:
-        # extract document KGs
-        extract_doc_kg_steps = [
-            Step_ExtractDocKg(
+        logging.info("splitting documents")
+        # split docs
+        split_doc_steps = [
+            Step_SplitDoc(
                 self.config,
                 doc_path=doc_path
             )
             for doc_path in source_paths
         ]
-        self.executor.execute_all(extract_doc_kg_steps)
+        self.executor.execute_all(split_doc_steps)
 
-        # merge doc KGs
+        logging.info("extracting chunk-level knowledge graphs")
+        extract_chunk_kg_steps = [
+            Step_ExtractChunkKg(
+                self.config,
+                fragment=fragment
+            )
+            for split_doc in split_doc_steps
+            for fragment in split_doc.output.chunks
+        ]
+        self.executor.execute_all(extract_chunk_kg_steps)
+
+        logging.info("merging knowledge graphs")
         graphs_to_merge = deque([
             step.output
-            for step in extract_doc_kg_steps
+            for step in extract_chunk_kg_steps
             if step.output      # for typing
         ])
         while 2 <= len(graphs_to_merge):

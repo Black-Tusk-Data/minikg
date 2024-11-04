@@ -27,6 +27,15 @@ class FileFragment(BaseModel):
     source_path: str
     start_line_incl: int
     end_line_excl: int
+
+    def read_contents(self) -> str:
+        with open(self.source_path, "r") as f:
+            lines = f.readlines()
+            return "".join(lines[
+                self.start_line_incl:
+                self.end_line_excl
+            ])
+        return
     pass
 
 
