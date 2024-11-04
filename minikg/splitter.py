@@ -23,7 +23,7 @@ class Splitter:
         while hi <= len(lines):
             fragments.append(FileFragment(
                 fragment_id=f"{path}:{lo}-{hi}",
-                source_path=path,
+                source_path=str(path),
                 start_line_incl=lo,
                 end_line_excl=hi,
             ))

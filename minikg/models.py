@@ -22,6 +22,14 @@ class MiniKgConfig(NamedTuple):
     pass
 
 
+class FileFragment(BaseModel):
+    fragment_id: str
+    source_path: str
+    start_line_incl: int
+    end_line_excl: int
+    pass
+
+
 class MiniKgBuildPlanStepOutput(abc.ABC):
     @abc.abstractmethod
     def to_file(self, path: Path) -> None:
@@ -76,11 +84,37 @@ class BuildStepOutput_Graph(MiniKgBuildPlanStepOutput):
     pass
 
 
-class FileFragment(BaseModel):
-    fragment_id: str
-    source_path: Path
-    start_line_incl: int
-    end_line_excl: int
+class BuildStepOutput_Chunks(MiniKgBuildPlanStepOutput):
+    def __init__(
+            self,
+            *,
+            chunks: list[FileFragment]
+    ):
+        self.chunks = chunks
+        return
+
+    def to_file(self, path: Path) -> None:
+        with open(path, "w") as f:
+            f.write(json.dumps({
+                "chunks": [
+                    chunk.model_dump()
+                    for chunk in self.chunks
+                ]
+            }))
+            pass
+        return
+
+    @staticmethod
+    def from_file(path: Path) -> "BuildStepOutput_Chunks":
+        data: dict
+        with open(path, "r") as f:
+            data = json.loads(f.read())
+            chunks = [
+                FileFragment.model_validate(chunk)
+                for chunk in data["chunks"]
+            ]
+            return BuildStepOutput_Chunks(chunks=chunks)
+
     pass
 
 

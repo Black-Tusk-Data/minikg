@@ -6,19 +6,21 @@ from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.models import BuildStepOutput_Graph, MiniKgConfig
 
 
-class Step_ExtractDocKg(MiniKgBuilderStep[BuildStepOutput_Graph]):
+class Step_ExtractChunkKg(MiniKgBuilderStep[BuildStepOutput_Graph]):
     def __init__(
             self,
             config: MiniKgConfig,
             *,
-            doc_path: Path,
+            chunk_id: str,
+            chunk_contents: str,
     ) -> None:
         super().__init__(config)
-        self.doc_path = doc_path
+        self.chunk_id = chunk_id
+        self.chunk_contents = chunk_contents
         return
 
     def get_id(self) -> str:
-        return str(self.doc_path).replace("/", "_")
+        return self.chunk_id
 
     @staticmethod
     def get_output_type():
