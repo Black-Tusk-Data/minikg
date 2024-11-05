@@ -11,7 +11,6 @@ from minikg.models import FileFragment, MiniKgConfig
 
 
 T = TypeVar("T")
-# S = TypeVar("S", bound=BaseModel)
 
 class BaseExtractor(Generic[T], abc.ABC):
     def __init__(
@@ -60,8 +59,13 @@ class BaseExtractor(Generic[T], abc.ABC):
         res = []
         return res
 
+    def _post_process(self, item: T) -> T:
+        return item
+
     def extract(self) -> list[T]:
-        """Override as necessary."""
-        return cast(list[T], self._llm_extraction())
+        return [
+            self._post_process(cast(T, item))
+            for item in self._llm_extraction()
+        ]
 
     pass

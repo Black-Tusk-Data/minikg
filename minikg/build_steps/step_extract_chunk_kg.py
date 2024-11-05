@@ -3,6 +3,7 @@ from pathlib import Path
 import networkx as nx
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
+from minikg.extractor.entity_extractor import EntityExtractor
 from minikg.models import BuildStepOutput_Graph, FileFragment, MiniKgConfig
 
 
@@ -28,11 +29,23 @@ class Step_ExtractChunkKg(MiniKgBuilderStep[BuildStepOutput_Graph]):
         # - read file
         # - run the KG extractor on it
         # - set the output to be a wrapped version of the NetworkX graph that handles reading / writing from disk
-        raise Exception("NOT READY!")
+        extactor = EntityExtractor(
+            config=self.config,
+            fragment=self.fragment,
+        )
+        entities = extactor.extract()
+        G = nx.Graph()
+        for entity in entities:
+            G.add_node(
+                entity.name,
+                labels=entity.labels,
+                description=entity.description,
+            )
+            pass
+
         graph_label = f"doc-{self.get_id()}"
-        self.output = BuildStepOutput_Graph(
-            G=nx.Graph(),
+        return BuildStepOutput_Graph(
+            G=G,
             label=graph_label,
         )
-        return
     pass
