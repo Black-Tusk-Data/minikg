@@ -9,13 +9,15 @@ class EntityRelationshipExtractor(BaseExtractor[EntityRelationship]):
         super().__init__(config=config, fragment=fragment)
         self.entities = entities
         return
+    def _get_llm_extraction_item_type(self) -> type[EntityRelationship]:
+        return EntityRelationship
 
     def _get_llm_extraction_item_shape(self) -> dict:
         raw = EntityRelationship.prompt_json_schema()
-        # set the enums!
+        # TODO: find a more elegant way to do this...
         entity_names = [entity.name for entity in self.entities]
-        raw["properties"]["entity_a"]["enum"] = entity_names
-        raw["properties"]["entity_b"]["enum"] = entity_names
+        raw["properties"]["source_entity"]["enum"] = entity_names
+        raw["properties"]["target_entity"]["enum"] = entity_names
         return raw
 
     def _get_entity_blurb(self, entity: Entity) -> str:

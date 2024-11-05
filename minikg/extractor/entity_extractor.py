@@ -5,8 +5,8 @@ from minikg.models import Entity
 
 
 class EntityExtractor(BaseExtractor[Entity]):
-    def _get_llm_extraction_item_shape(self) -> dict:
-        return Entity.prompt_json_schema()_
+    def _get_llm_extraction_item_type(self) -> type[Entity]:
+        return Entity
 
     def _post_process(self, extractions: list[Entity]) -> list[Entity]:
         # could group these if they are too similar

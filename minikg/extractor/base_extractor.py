@@ -9,10 +9,10 @@ from expert_llm.models import ChatBlock
 from expert_llm.remote.openai_shaped_client_implementations import OpenAIApiClient
 from pydantic import Field, create_model, BaseModel
 
-from minikg.models import FileFragment, MiniKgConfig
+from minikg.models import CompletionShape, FileFragment, MiniKgConfig
 
 
-T = TypeVar("T", bound=BaseModel)
+T = TypeVar("T", bound=CompletionShape)
 
 class BaseExtractor(Generic[T], abc.ABC):
     def __init__(
@@ -33,8 +33,11 @@ class BaseExtractor(Generic[T], abc.ABC):
         # )
         return
 
-    @abc.abstractmethod
     def _get_llm_extraction_item_shape(self) -> dict:
+        return self._get_llm_extraction_item_type().prompt_json_schema()
+
+    @abc.abstractmethod
+    def _get_llm_extraction_item_type(self) -> type[T]:
         pass
 
     @abc.abstractmethod
@@ -65,6 +68,7 @@ class BaseExtractor(Generic[T], abc.ABC):
     def _llm_extraction(self) -> list[BaseModel]:
         system_prompt = self._get_system_prompt()
         user_prompt = self._get_user_prompt()
+        response_type = self._get_llm_extraction_item_type()
         # TODO: run this through a structured completion, the result of which is the list[S]
 
         extraction_item_shape = self._get_llm_extraction_item_shape()
@@ -75,13 +79,20 @@ class BaseExtractor(Generic[T], abc.ABC):
                 ChatBlock(role="user", content=user_prompt)
             ],
             output_schema={
-                "type": "array",
-                "items": extraction_item_shape,
-                "description": "extractions",
+                "type": "object",
+                "required": ["extractions"],
+                "properties": {
+                    "extractions": {
+                        "type": "array",
+                        "items": extraction_item_shape,
+                        "description": "Extractions derived from text",
+                    },
+                },
             },
             output_schema_name="Extractions",
         )
-        return res.extractions  # type: ignore (TODO)
+        print("RES:", res)
+        return [response_type.model_validate(row) for row in res["extractions"]]
 
     def _post_process(self, extractions: list[T]) -> list[T]:
         return extractions

@@ -36,6 +36,7 @@ class Step_ExtractChunkKg(MiniKgBuilderStep[BuildStepOutput_Graph]):
             fragment=self.fragment,
         )
         entities = entity_extactor.extract()
+        # could split this into two steps, one for entities one for relationships...
 
         entity_relationship_extractor = EntityRelationshipExtractor(
             config=self.config,
