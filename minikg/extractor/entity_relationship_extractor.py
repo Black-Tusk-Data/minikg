@@ -10,7 +10,7 @@ class EntityRelationshipExtractor(BaseExtractor[EntityRelationship]):
         self.entities = entities
         return
 
-    def _get_llm_output_shape(self) -> dict:
+    def _get_llm_extraction_item_shape(self) -> dict:
         raw = EntityRelationship.prompt_json_schema()
         # set the enums!
         entity_names = [entity.name for entity in self.entities]

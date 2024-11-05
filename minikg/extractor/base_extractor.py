@@ -5,12 +5,14 @@ Use larger chunk sizes with multiple rounds
 import abc
 from typing import Generic, Type, TypeVar, cast
 
-from pydantic import BaseModel
+from expert_llm.models import ChatBlock
+from expert_llm.remote.openai_shaped_client_implementations import OpenAIApiClient
+from pydantic import Field, create_model, BaseModel
 
 from minikg.models import FileFragment, MiniKgConfig
 
 
-T = TypeVar("T")
+T = TypeVar("T", bound=BaseModel)
 
 class BaseExtractor(Generic[T], abc.ABC):
     def __init__(
@@ -21,10 +23,18 @@ class BaseExtractor(Generic[T], abc.ABC):
     ):
         self.config = config
         self.fragment = fragment
+        # TODO: make this configurable
+        self.llm_client = OpenAIApiClient("gpt-4o")
+        # self.output_model = create_model(
+        #     f"Output-{self.__class__.__name__}",
+        #     extractions=(list[self._get_llm_extraction_item_shape()], Field(
+        #         description="Extractions from the text",
+        #     )),
+        # )
         return
 
     @abc.abstractmethod
-    def _get_llm_output_shape(self) -> dict:
+    def _get_llm_extraction_item_shape(self) -> dict:
         pass
 
     @abc.abstractmethod
@@ -56,16 +66,32 @@ class BaseExtractor(Generic[T], abc.ABC):
         system_prompt = self._get_system_prompt()
         user_prompt = self._get_user_prompt()
         # TODO: run this through a structured completion, the result of which is the list[S]
-        res = []
-        return res
 
-    def _post_process(self, item: T) -> T:
-        return item
+        extraction_item_shape = self._get_llm_extraction_item_shape()
+
+        res = self.llm_client.structured_completion_raw(
+            chat_blocks=[
+                ChatBlock(role="system", content=system_prompt),
+                ChatBlock(role="user", content=user_prompt)
+            ],
+            output_schema={
+                "type": "array",
+                "items": extraction_item_shape,
+                "description": "extractions",
+            },
+            output_schema_name="Extractions",
+        )
+        return res.extractions  # type: ignore (TODO)
+
+    def _post_process(self, extractions: list[T]) -> list[T]:
+        return extractions
 
     def extract(self) -> list[T]:
-        return [
-            self._post_process(cast(T, item))
-            for item in self._llm_extraction()
-        ]
+        return self._post_process(
+            cast(
+                list[T],
+                self._llm_extraction()
+            ),
+        )
 
     pass

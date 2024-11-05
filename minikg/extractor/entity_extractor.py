@@ -5,8 +5,15 @@ from minikg.models import Entity
 
 
 class EntityExtractor(BaseExtractor[Entity]):
-    def _get_llm_output_shape(self) -> dict:
-        return Entity.prompt_json_schema()
+    def _get_llm_extraction_item_shape(self) -> dict:
+        return Entity.prompt_json_schema()_
+
+    def _post_process(self, extractions: list[Entity]) -> list[Entity]:
+        # could group these if they are too similar
+        for entity in extractions:
+            entity.name = entity.name.upper()
+            pass
+        return extractions
 
     def _get_user_prompt_lines(self) -> list[str]:
         return [
