@@ -80,19 +80,20 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
 
     @abc.abstractmethod
     def _execute(self) -> T:
-        pass
+        raise NotImplementedError()
 
     @staticmethod
     @abc.abstractmethod
     def get_output_type() -> Type[T]:
-        pass
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def get_id(self) -> str:
         """
         A unique identifier for caching.
+        Note it must only be unique among classes of the same type.
         """
-        pass
+        raise NotImplementedError()
 
     @classmethod
     def load_from_output(
@@ -105,15 +106,5 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
         loaded.output = output
         loaded.executed = True
         return loaded
-
-    # @abc.abstractmethod
-    # @classmethod
-    # def _load_from_raw(cls: type["MiniKgBuilderStep"], raw: bytes) -> "MiniKgBuilderStep":
-    #     pass
-
-    # @abc.abstractmethod
-    # @staticmethod
-    # def dump_output_to_raw() -> bytes:
-    #     pass
 
     pass

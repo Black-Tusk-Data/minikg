@@ -92,32 +92,18 @@ class Api:
         self.executor.execute_all(extract_chunk_kg_steps)
 
         logging.info("merging knowledge graphs")
-        graphs_to_merge = deque([
+        graphs_to_merge = [
             step.output
             for step in extract_chunk_kg_steps
             if step.output      # for typing
-        ])
-        while 2 <= len(graphs_to_merge):
-            merge_tasks: list[Step_MergeKgs] = []
-            while 2 <= len(graphs_to_merge):
-                merge_tasks.append(
-                    Step_MergeKgs(
-                        self.config,
-                        graphA=graphs_to_merge.popleft(),
-                        graphB=graphs_to_merge.popleft(),
-                    )
-                )
-                pass
-            self.executor.execute_all(merge_tasks)
-            graphs_to_merge.extend([
-                task.output
-                for task in merge_tasks
-            ])
-            pass
+        ]
+        merge_step = Step_MergeKgs(
+            self.config,
+            graphs=graphs_to_merge,
+        )
+        self.executor.execute_all([merge_step])
 
-
-        assert len(graphs_to_merge) == 1
-        # GET THIS TO WORK UP TO HERE
+        print("DONE FOR NOW!")
 
         # build community KG
         return
