@@ -5,6 +5,7 @@
 import abc
 import base64
 import json
+import pickle
 from pathlib import Path
 import re
 from typing import Literal, NamedTuple
@@ -66,11 +67,13 @@ class BuildStepOutput_Graph(MiniKgBuildPlanStepOutput):
         return
 
     def to_file(self, path: Path) -> None:
-        graph6_bytes = nx.to_graph6_bytes(self.G)
+        graph_bytes = pickle.dumps(
+            self.G
+        )
         json_data = json.dumps({
             "label": self.label,
-            "graph6_b64": base64.b64encode(
-                graph6_bytes
+            "graph_b64": base64.b64encode(
+                graph_bytes
             ).decode("utf-8"),
         })
         with open(path, "w") as f:
@@ -85,11 +88,9 @@ class BuildStepOutput_Graph(MiniKgBuildPlanStepOutput):
             data = json.loads(f.read())
             pass
 
-        graph6_bytes = base64.b64decode(
-            data["graph6_b64"]
-        )
+        graph_bytes = base64.b64decode(data["graph_b64"])
         return BuildStepOutput_Graph(
-            G=nx.from_graph6_bytes(graph6_bytes),
+            G=pickle.loads(graph_bytes),
             label=data["label"],
         )
 
@@ -143,6 +144,7 @@ class Entity(CompletionShape):
     name: str = Field(
         description="Name of the entity"
     )
+    # this could definitely be a domain-specific enum!
     labels: list[str] = Field(
         description="Applicable labels"
     )
