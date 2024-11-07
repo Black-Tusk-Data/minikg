@@ -8,12 +8,16 @@ import json
 import pickle
 from pathlib import Path
 import re
-from typing import Literal, NamedTuple
+from typing import Generic, Literal, NamedTuple, TypeVar
 
 import networkx as nx
 from pydantic import BaseModel, Field
 
 from minikg.utils import scrub_title_key
+
+
+GraphType = nx.Graph | nx.MultiGraph
+GT = TypeVar("GT", bound=GraphType)
 
 
 class MiniKgConfig(NamedTuple):
@@ -46,24 +50,30 @@ class MiniKgBuildPlanStepOutput(abc.ABC):
     def to_file(self, path: Path) -> None:
         pass
 
-    @staticmethod
+    @classmethod
     @abc.abstractmethod
-    def from_file(path: Path) -> "MiniKgBuildPlanStepOutput":
+    def from_file(cls, path: Path) -> "MiniKgBuildPlanStepOutput":
         pass
 
     pass
 
 
-class BuildStepOutput_Graph(MiniKgBuildPlanStepOutput):
+class BuildStepOutput_BaseGraph(MiniKgBuildPlanStepOutput, Generic[GT], abc.ABC):
     def __init__(
         self,
         *,
         label: str,
-        G: nx.Graph,
+        G: GT,
     ):
         self.label = label
         self.G = G
         return
+
+    # @abc.abstractmethod
+    # @staticmethod
+    # def get_graph_type() -> type[GT]:
+    #     raise NotImplementedError()
+
 
     def to_file(self, path: Path) -> None:
         graph_bytes = pickle.dumps(self.G)
@@ -78,19 +88,28 @@ class BuildStepOutput_Graph(MiniKgBuildPlanStepOutput):
             pass
         return
 
-    @staticmethod
-    def from_file(path: Path) -> "BuildStepOutput_Graph":
+    @classmethod
+    def from_file(cls, path: Path) -> "BuildStepOutput_BaseGraph":
         data: dict
         with open(path, "r") as f:
             data = json.loads(f.read())
             pass
 
         graph_bytes = base64.b64decode(data["graph_b64"])
-        return BuildStepOutput_Graph(
-            G=pickle.loads(graph_bytes),
+        graph = pickle.loads(graph_bytes)
+        return cls(
+            G=graph,
             label=data["label"],
         )
 
+    pass
+
+
+class BuildStepOutput_Graph(BuildStepOutput_BaseGraph[nx.Graph]):
+    pass
+
+
+class BuildStepOutput_MultiGraph(BuildStepOutput_BaseGraph[nx.MultiGraph]):
     pass
 
 
@@ -107,8 +126,8 @@ class BuildStepOutput_Chunks(MiniKgBuildPlanStepOutput):
             pass
         return
 
-    @staticmethod
-    def from_file(path: Path) -> "BuildStepOutput_Chunks":
+    @classmethod
+    def from_file(cls, path: Path) -> "BuildStepOutput_Chunks":
         data: dict
         with open(path, "r") as f:
             data = json.loads(f.read())

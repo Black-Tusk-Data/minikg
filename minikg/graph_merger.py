@@ -8,14 +8,14 @@ class GraphMerger:
         self,
         config: MiniKgConfig,
         *,
-        graphs: list[nx.Graph],
+        graphs: list[nx.Graph], # TODO: could be multigraph already
     ):
         self.config = config
         self.graphs = graphs
         return
 
-    def merge(self) -> nx.Graph:
-        G_new = nx.Graph()
+    def merge(self) -> nx.MultiGraph:
+        G_new = nx.MultiGraph()
         # nodes
         for G in self.graphs:
             # 'node_label' is just a string
@@ -32,11 +32,15 @@ class GraphMerger:
 
         # edges
         for G in self.graphs:
+            # TODO:
+            #  - change to multigraph and just gather up edges
+            #  - we can add a 'flatten edges' step after
+
             # 'edge' is a tuple of strings
             for edge in G.edges:
-                if edge in G_new:
-                    # TODO: again, could merge these more intelligently
-                    continue
+                # if edge in G_new:
+                #     # TODO: again, could merge these more intelligently
+                #     continue
                 G_new.add_edge(*edge, **G.edges[edge])
                 pass
             pass

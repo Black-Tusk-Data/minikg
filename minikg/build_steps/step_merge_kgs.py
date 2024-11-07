@@ -2,10 +2,10 @@ import networkx as nx
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_merger import GraphMerger
-from minikg.models import BuildStepOutput_Graph, MiniKgConfig
+from minikg.models import BuildStepOutput_Graph, BuildStepOutput_MultiGraph, MiniKgConfig
 
 
-class Step_MergeKgs(MiniKgBuilderStep[BuildStepOutput_Graph]):
+class Step_MergeKgs(MiniKgBuilderStep[BuildStepOutput_MultiGraph]):
     def __init__(
         self,
         config: MiniKgConfig,
@@ -24,9 +24,9 @@ class Step_MergeKgs(MiniKgBuilderStep[BuildStepOutput_Graph]):
 
     @staticmethod
     def get_output_type():
-        return BuildStepOutput_Graph
+        return BuildStepOutput_MultiGraph
 
-    def _execute(self) -> BuildStepOutput_Graph:
+    def _execute(self) -> BuildStepOutput_MultiGraph:
         merger = GraphMerger(
             self.config,
             graphs=[step.G for step in self.graphs],
@@ -34,7 +34,7 @@ class Step_MergeKgs(MiniKgBuilderStep[BuildStepOutput_Graph]):
         merged_graph = merger.merge()
 
         graph_label = f"merged-{self._get_merged_graphs_id()}"
-        return BuildStepOutput_Graph(
+        return BuildStepOutput_MultiGraph(
             G=merged_graph,
             label=graph_label,
         )
