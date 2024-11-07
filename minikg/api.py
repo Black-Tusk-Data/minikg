@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 import logging
 import os
 from pathlib import Path
+from typing import Generic, TypeVar
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.build_steps.step_extract_chunk_kg import Step_ExtractChunkKg
@@ -12,12 +13,20 @@ from minikg.build_steps.step_split_doc import Step_SplitDoc
 from minikg.models import MiniKgConfig
 
 
-def execute_step(step: MiniKgBuilderStep) -> MiniKgBuilderStep:
+DEBUG = bool(int(os.environ.get("DEBUG", 0)))
+if DEBUG:
+    logging.warning("EXECUTING IN DEBUG MODE")
+    pass
+
+
+T = TypeVar("T", bound=MiniKgBuilderStep)
+
+def execute_step(step: T) -> T:
     step.execute()
     return step
 
 
-class StepExecutor:
+class StepExecutor(Generic[T]):
     MAX_CONCURRENCY = 5         # arbitrary
 
     def __init__(
@@ -27,14 +36,21 @@ class StepExecutor:
         self.config = config
         return
 
-    def execute_all(self, steps: list[MiniKgBuilderStep]):
+    def execute_all(self, steps: list[T]) -> list[T]:
         if not steps:
-            return
+            return []
         logging.debug(
             "executing %d steps of type %s",
             len(steps),
             steps[0].__class__.__name__,
         )
+        if DEBUG:
+            for step in steps:
+                return [
+                    execute_step(step)
+                    for step in steps
+                ]
+            pass
         with ProcessPoolExecutor(max_workers=self.MAX_CONCURRENCY) as ex:
             completed_steps = list(ex.map(execute_step, steps))
             return completed_steps
@@ -59,11 +75,15 @@ class Api:
         return
 
     def _gather_input_files(self) -> list[Path]:
-        return list(
-            self.config.input_dir.rglob(
-                self.config.input_file_exp
-            )
-        )
+        return list(self.config.input_dir.rglob(
+            self.config.input_file_exp
+        ))
+        # return [
+        #     path.relative_to(self.config.input_dir)
+        #     for path in self.config.input_dir.rglob(
+        #             self.config.input_file_exp
+        #     )
+        # ]
 
     def build_kg(self) -> None:
         source_paths = self._gather_input_files()
@@ -89,7 +109,7 @@ class Api:
             for split_doc in split_doc_steps
             for fragment in split_doc.output.chunks
         ]
-        self.executor.execute_all(extract_chunk_kg_steps)
+        extract_chunk_kg_steps = self.executor.execute_all(extract_chunk_kg_steps)
 
         logging.info("merging knowledge graphs")
         graphs_to_merge = [

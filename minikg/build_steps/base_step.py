@@ -24,7 +24,9 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
 
     def _get_cache_output_path(self) -> Path:
         clsname = self.__class__.__name__
-        return self.config.persist_dir / clsname / self.get_id()
+        instance_id = self.get_id()
+        assert instance_id
+        return self.config.persist_dir / clsname / instance_id
 
     def _write_output_to_cache(self):
         output = self.get_output()
