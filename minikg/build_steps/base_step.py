@@ -9,13 +9,9 @@ from minikg.models import MiniKgBuildPlanStepOutput, MiniKgConfig
 
 T = TypeVar("T", bound=MiniKgBuildPlanStepOutput)
 
+
 class MiniKgBuilderStep(Generic[T], abc.ABC):
-    def __init__(
-            self,
-            config: MiniKgConfig,
-            *,
-            ignore_cache: bool = False
-    ):
+    def __init__(self, config: MiniKgConfig, *, ignore_cache: bool = False):
         self.config = config
         self.executed = False
         self.output: None | T = None
@@ -44,13 +40,10 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
             return None
         output_type = self.__class__.get_output_type()
         try:
-            return output_type.from_file(
-                cached_output_path
-            )
+            return output_type.from_file(cached_output_path)
         except Exception as e:
             logging.error(
-                "Failed to load cached KG build step from %s: %s",
-                cached_output_path, e
+                "Failed to load cached KG build step from %s: %s", cached_output_path, e
             )
             pass
         return None
@@ -99,10 +92,10 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
 
     @classmethod
     def load_from_output(
-            cls: type["MiniKgBuilderStep"],
-            *,
-            output: MiniKgBuildPlanStepOutput,
-            config: MiniKgConfig,
+        cls: type["MiniKgBuilderStep"],
+        *,
+        output: MiniKgBuildPlanStepOutput,
+        config: MiniKgConfig,
     ) -> "MiniKgBuilderStep":
         loaded = cls(config)
         loaded.output = output

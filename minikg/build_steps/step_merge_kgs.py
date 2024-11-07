@@ -7,10 +7,10 @@ from minikg.models import BuildStepOutput_Graph, MiniKgConfig
 
 class Step_MergeKgs(MiniKgBuilderStep[BuildStepOutput_Graph]):
     def __init__(
-            self,
-            config: MiniKgConfig,
-            *,
-            graphs: list[BuildStepOutput_Graph],
+        self,
+        config: MiniKgConfig,
+        *,
+        graphs: list[BuildStepOutput_Graph],
     ) -> None:
         super().__init__(config)
         self.graphs = graphs
@@ -20,10 +20,7 @@ class Step_MergeKgs(MiniKgBuilderStep[BuildStepOutput_Graph]):
         return self._get_merged_graphs_id()
 
     def _get_merged_graphs_id(self) -> str:
-        return ":".join(sorted([
-            graph.label
-            for graph in self.graphs
-        ]))
+        return ":".join(sorted([graph.label for graph in self.graphs]))
 
     @staticmethod
     def get_output_type():

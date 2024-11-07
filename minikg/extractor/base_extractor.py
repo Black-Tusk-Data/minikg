@@ -14,12 +14,13 @@ from minikg.models import CompletionShape, FileFragment, MiniKgConfig
 
 T = TypeVar("T", bound=CompletionShape)
 
+
 class BaseExtractor(Generic[T], abc.ABC):
     def __init__(
-            self,
-            *,
-            config: MiniKgConfig,
-            fragment: FileFragment,
+        self,
+        *,
+        config: MiniKgConfig,
+        fragment: FileFragment,
     ):
         self.config = config
         self.fragment = fragment
@@ -47,10 +48,9 @@ class BaseExtractor(Generic[T], abc.ABC):
     def _get_fragment_contents(self) -> str:
         with open(self.fragment.source_path) as f:
             lines = f.readlines()
-            text = "".join(lines[
-                self.fragment.start_line_incl:
-                self.fragment.end_line_excl
-            ])
+            text = "".join(
+                lines[self.fragment.start_line_incl : self.fragment.end_line_excl]
+            )
             return text
         pass
 
@@ -76,7 +76,7 @@ class BaseExtractor(Generic[T], abc.ABC):
         res = self.llm_client.structured_completion_raw(
             chat_blocks=[
                 ChatBlock(role="system", content=system_prompt),
-                ChatBlock(role="user", content=user_prompt)
+                ChatBlock(role="user", content=user_prompt),
             ],
             output_schema={
                 "type": "object",
@@ -99,10 +99,7 @@ class BaseExtractor(Generic[T], abc.ABC):
 
     def extract(self) -> list[T]:
         return self._post_process(
-            cast(
-                list[T],
-                self._llm_extraction()
-            ),
+            cast(list[T], self._llm_extraction()),
         )
 
     pass

@@ -10,10 +10,10 @@ from minikg.splitter import Splitter
 
 class Step_SplitDoc(MiniKgBuilderStep[BuildStepOutput_Chunks]):
     def __init__(
-            self,
-            config: MiniKgConfig,
-            *,
-            doc_path: Path,
+        self,
+        config: MiniKgConfig,
+        *,
+        doc_path: Path,
     ) -> None:
         super().__init__(config)
         self.doc_path = doc_path
@@ -35,4 +35,5 @@ class Step_SplitDoc(MiniKgBuilderStep[BuildStepOutput_Chunks]):
             len(chunks),
         )
         return BuildStepOutput_Chunks(chunks=chunks)
+
     pass

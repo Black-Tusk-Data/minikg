@@ -1,14 +1,23 @@
 from typing import Type
 from pydantic import BaseModel
 from minikg.extractor.base_extractor import BaseExtractor
-from minikg.models import CompletionShape, Entity, EntityRelationship, FileFragment, MiniKgConfig
+from minikg.models import (
+    CompletionShape,
+    Entity,
+    EntityRelationship,
+    FileFragment,
+    MiniKgConfig,
+)
 
 
 class EntityRelationshipExtractor(BaseExtractor[EntityRelationship]):
-    def __init__(self, *, config: MiniKgConfig, fragment: FileFragment, entities: list[Entity]):
+    def __init__(
+        self, *, config: MiniKgConfig, fragment: FileFragment, entities: list[Entity]
+    ):
         super().__init__(config=config, fragment=fragment)
         self.entities = entities
         return
+
     def _get_llm_extraction_item_type(self) -> type[EntityRelationship]:
         return EntityRelationship
 
@@ -24,10 +33,7 @@ class EntityRelationshipExtractor(BaseExtractor[EntityRelationship]):
         return f"'{entity.name}' - {entity.description}"
 
     def _get_all_entities_blurb(self) -> str:
-        return "\n".join([
-            self._get_entity_blurb(entity)
-            for entity in self.entities
-        ])
+        return "\n".join([self._get_entity_blurb(entity) for entity in self.entities])
 
     def _get_user_prompt_lines(self) -> list[str]:
         return [

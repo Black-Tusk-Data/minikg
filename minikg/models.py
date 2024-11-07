@@ -17,7 +17,7 @@ from minikg.utils import scrub_title_key
 
 
 class MiniKgConfig(NamedTuple):
-    knowledge_domain: str       # like 'sales calls'
+    knowledge_domain: str  # like 'sales calls'
     persist_dir: Path
     input_dir: Path
     input_file_exp: str
@@ -35,11 +35,9 @@ class FileFragment(BaseModel):
     def read_contents(self) -> str:
         with open(self.source_path, "r") as f:
             lines = f.readlines()
-            return "".join(lines[
-                self.start_line_incl:
-                self.end_line_excl
-            ])
+            return "".join(lines[self.start_line_incl : self.end_line_excl])
         return
+
     pass
 
 
@@ -52,30 +50,29 @@ class MiniKgBuildPlanStepOutput(abc.ABC):
     @abc.abstractmethod
     def from_file(path: Path) -> "MiniKgBuildPlanStepOutput":
         pass
+
     pass
 
 
 class BuildStepOutput_Graph(MiniKgBuildPlanStepOutput):
     def __init__(
-            self,
-            *,
-            label: str,
-            G: nx.Graph,
+        self,
+        *,
+        label: str,
+        G: nx.Graph,
     ):
         self.label = label
         self.G = G
         return
 
     def to_file(self, path: Path) -> None:
-        graph_bytes = pickle.dumps(
-            self.G
+        graph_bytes = pickle.dumps(self.G)
+        json_data = json.dumps(
+            {
+                "label": self.label,
+                "graph_b64": base64.b64encode(graph_bytes).decode("utf-8"),
+            }
         )
-        json_data = json.dumps({
-            "label": self.label,
-            "graph_b64": base64.b64encode(
-                graph_bytes
-            ).decode("utf-8"),
-        })
         with open(path, "w") as f:
             f.write(json_data)
             pass
@@ -98,22 +95,15 @@ class BuildStepOutput_Graph(MiniKgBuildPlanStepOutput):
 
 
 class BuildStepOutput_Chunks(MiniKgBuildPlanStepOutput):
-    def __init__(
-            self,
-            *,
-            chunks: list[FileFragment]
-    ):
+    def __init__(self, *, chunks: list[FileFragment]):
         self.chunks = chunks
         return
 
     def to_file(self, path: Path) -> None:
         with open(path, "w") as f:
-            f.write(json.dumps({
-                "chunks": [
-                    chunk.model_dump()
-                    for chunk in self.chunks
-                ]
-            }))
+            f.write(
+                json.dumps({"chunks": [chunk.model_dump() for chunk in self.chunks]})
+            )
             pass
         return
 
@@ -122,10 +112,7 @@ class BuildStepOutput_Chunks(MiniKgBuildPlanStepOutput):
         data: dict
         with open(path, "r") as f:
             data = json.loads(f.read())
-            chunks = [
-                FileFragment.model_validate(chunk)
-                for chunk in data["chunks"]
-            ]
+            chunks = [FileFragment.model_validate(chunk) for chunk in data["chunks"]]
             return BuildStepOutput_Chunks(chunks=chunks)
 
     pass
@@ -137,20 +124,15 @@ class CompletionShape(BaseModel):
     def prompt_json_schema(cls: type["CompletionShape"]) -> dict:
         raw = cls.model_json_schema()
         return scrub_title_key(raw)
+
     pass
 
 
 class Entity(CompletionShape):
-    name: str = Field(
-        description="Name of the entity"
-    )
+    name: str = Field(description="Name of the entity")
     # this could definitely be a domain-specific enum!
-    labels: list[str] = Field(
-        description="Applicable labels"
-    )
-    description: str = Field(
-        description="A short description of the entity"
-    )
+    labels: list[str] = Field(description="Applicable labels")
+    description: str = Field(description="A short description of the entity")
     pass
 
 

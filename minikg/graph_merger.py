@@ -5,10 +5,10 @@ from minikg.models import MiniKgConfig
 
 class GraphMerger:
     def __init__(
-            self,
-            config: MiniKgConfig,
-            *,
-            graphs: list[nx.Graph],
+        self,
+        config: MiniKgConfig,
+        *,
+        graphs: list[nx.Graph],
     ):
         self.config = config
         self.graphs = graphs

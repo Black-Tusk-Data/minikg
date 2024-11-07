@@ -21,17 +21,18 @@ if DEBUG:
 
 T = TypeVar("T", bound=MiniKgBuilderStep)
 
+
 def execute_step(step: T) -> T:
     step.execute()
     return step
 
 
 class StepExecutor(Generic[T]):
-    MAX_CONCURRENCY = 5         # arbitrary
+    MAX_CONCURRENCY = 5  # arbitrary
 
     def __init__(
-            self,
-            config: MiniKgConfig,
+        self,
+        config: MiniKgConfig,
     ):
         self.config = config
         return
@@ -46,10 +47,7 @@ class StepExecutor(Generic[T]):
         )
         if DEBUG:
             for step in steps:
-                return [
-                    execute_step(step)
-                    for step in steps
-                ]
+                return [execute_step(step) for step in steps]
             pass
         with ProcessPoolExecutor(max_workers=self.MAX_CONCURRENCY) as ex:
             completed_steps = list(ex.map(execute_step, steps))
@@ -59,14 +57,14 @@ class StepExecutor(Generic[T]):
 
 class Api:
     def __init__(
-            self,
-            *,
-            config: MiniKgConfig,
+        self,
+        *,
+        config: MiniKgConfig,
     ):
         self.config = config
         self.executor = StepExecutor(config)
         for dirpath in [
-                config.persist_dir,
+            config.persist_dir,
         ]:
             if not dirpath.exists():
                 os.makedirs(dirpath)
@@ -75,9 +73,7 @@ class Api:
         return
 
     def _gather_input_files(self) -> list[Path]:
-        return list(self.config.input_dir.rglob(
-            self.config.input_file_exp
-        ))
+        return list(self.config.input_dir.rglob(self.config.input_file_exp))
         # return [
         #     path.relative_to(self.config.input_dir)
         #     for path in self.config.input_dir.rglob(
@@ -92,20 +88,13 @@ class Api:
         logging.info("splitting documents")
         # split docs
         split_doc_steps = [
-            Step_SplitDoc(
-                self.config,
-                doc_path=doc_path
-            )
-            for doc_path in source_paths
+            Step_SplitDoc(self.config, doc_path=doc_path) for doc_path in source_paths
         ]
         split_doc_steps = self.executor.execute_all(split_doc_steps)
 
         logging.info("extracting chunk-level knowledge graphs")
         extract_chunk_kg_steps = [
-            Step_ExtractChunkKg(
-                self.config,
-                fragment=fragment
-            )
+            Step_ExtractChunkKg(self.config, fragment=fragment)
             for split_doc in split_doc_steps
             for fragment in split_doc.output.chunks
         ]
@@ -113,9 +102,7 @@ class Api:
 
         logging.info("merging knowledge graphs")
         graphs_to_merge = [
-            step.output
-            for step in extract_chunk_kg_steps
-            if step.output      # for typing
+            step.output for step in extract_chunk_kg_steps if step.output  # for typing
         ]
         merge_step = Step_MergeKgs(
             self.config,
@@ -129,8 +116,8 @@ class Api:
         return
 
     def update_kg(
-            self,
-            source_paths: list[Path],
+        self,
+        source_paths: list[Path],
     ) -> None:
         return
 

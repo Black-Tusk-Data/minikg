@@ -4,9 +4,9 @@ from minikg.models import FileFragment, MiniKgConfig
 
 class Splitter:
     def __init__(
-            self,
-            *,
-            config: MiniKgConfig,
+        self,
+        *,
+        config: MiniKgConfig,
     ):
         self.config = config
         self.window_offset = config.max_chunk_lines - config.chunk_overlap_lines
@@ -22,12 +22,14 @@ class Splitter:
 
         lo, hi = 0, self.config.max_chunk_lines
         while hi <= len(lines):
-            fragments.append(FileFragment(
-                fragment_id=f"{sanitized_path}:{lo}-{hi}",
-                source_path=str(path),
-                start_line_incl=lo,
-                end_line_excl=hi,
-            ))
+            fragments.append(
+                FileFragment(
+                    fragment_id=f"{sanitized_path}:{lo}-{hi}",
+                    source_path=str(path),
+                    start_line_incl=lo,
+                    end_line_excl=hi,
+                )
+            )
             lo += self.window_offset
             hi += self.window_offset
             pass

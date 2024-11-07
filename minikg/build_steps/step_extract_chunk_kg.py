@@ -10,12 +10,7 @@ from minikg.models import BuildStepOutput_Graph, FileFragment, MiniKgConfig
 
 
 class Step_ExtractChunkKg(MiniKgBuilderStep[BuildStepOutput_Graph]):
-    def __init__(
-            self,
-            config: MiniKgConfig,
-            *,
-            fragment: FileFragment
-    ) -> None:
+    def __init__(self, config: MiniKgConfig, *, fragment: FileFragment) -> None:
         super().__init__(config)
         self.fragment = fragment
         return
@@ -67,4 +62,5 @@ class Step_ExtractChunkKg(MiniKgBuilderStep[BuildStepOutput_Graph]):
             G=G,
             label=graph_label,
         )
+
     pass
