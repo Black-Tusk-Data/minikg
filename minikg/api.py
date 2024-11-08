@@ -10,9 +10,11 @@ from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.build_steps.step_extract_chunk_kg import Step_ExtractChunkKg
 from minikg.build_steps.step_merge_kgs import Step_MergeKgs
 from minikg.build_steps.step_split_doc import Step_SplitDoc
+from minikg.graph_edge_compressor import GraphEdgeCompressor
 from minikg.models import MiniKgConfig
 
 
+# TODO: YOU STILL HAVE MULTIPROCESSING ISSUES WITH CACHING
 DEBUG = bool(int(os.environ.get("DEBUG", 0)))
 if DEBUG:
     logging.warning("EXECUTING IN DEBUG MODE")
@@ -110,6 +112,11 @@ class Api:
         )
         self.executor.execute_all([merge_step])
 
+
+        assert merge_step.output
+        logging.info("compressing knowledge graph edges")
+        compressor = GraphEdgeCompressor(self.config, G=merge_step.output.G)
+        compressor.compress_redundant()
         print("DONE FOR NOW!")
 
         # build community KG

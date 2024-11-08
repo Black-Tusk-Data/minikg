@@ -56,7 +56,8 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
         cached_output = self._get_cached_output()
         if not self.ignore_cache and cached_output:
             logging.debug(
-                "Using cached KG build step %s",
+                "Using cached %s %s",
+                self.__class__.__name__,
                 self.get_id(),
             )
             self.output = cached_output
