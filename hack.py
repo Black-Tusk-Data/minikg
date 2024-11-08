@@ -2,11 +2,6 @@
 
 import logging
 import os
-from pathlib import Path
-
-from minikg.api import Api
-from minikg.models import MiniKgConfig
-
 
 LOG_FMT = (
     f"%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s"
@@ -17,6 +12,14 @@ logging.basicConfig(
     format=LOG_FMT,
     datefmt="%Y-%m-%dT%H:%M:%S%z",
 )
+
+from pathlib import Path
+
+from minikg.api import Api
+from minikg.models import MiniKgConfig
+
+
+
 
 config = MiniKgConfig(
     knowledge_domain="Physics history",
@@ -29,6 +32,7 @@ config = MiniKgConfig(
 
 
 def main():
+    logging.info("BEGIN")
     api = Api(config=config)
     api.build_kg()
     return

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Generic, TypeVar
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
+from minikg.build_steps.step_compress_kg_edges import Step_CompressRedundantEdges
 from minikg.build_steps.step_extract_chunk_kg import Step_ExtractChunkKg
 from minikg.build_steps.step_merge_kgs import Step_MergeKgs
 from minikg.build_steps.step_split_doc import Step_SplitDoc
@@ -114,9 +115,13 @@ class Api:
 
 
         assert merge_step.output
-        logging.info("compressing knowledge graph edges")
-        compressor = GraphEdgeCompressor(self.config, G=merge_step.output.G)
-        compressor.compress_redundant()
+        logging.info("compressing redundant knowledge graph edges")
+        compress_step = Step_CompressRedundantEdges(
+            self.config,
+            graph=merge_step.output,
+        )
+        self.executor.execute_all([compress_step])
+
         print("DONE FOR NOW!")
 
         # build community KG
