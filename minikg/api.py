@@ -8,6 +8,7 @@ from typing import Generic, TypeVar
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.build_steps.step_compress_kg_edges import Step_CompressRedundantEdges
+from minikg.build_steps.step_define_communities import Step_DefineCommunitiesLouvain
 from minikg.build_steps.step_extract_chunk_kg import Step_ExtractChunkKg
 from minikg.build_steps.step_merge_kgs import Step_MergeKgs
 from minikg.build_steps.step_split_doc import Step_SplitDoc
@@ -121,6 +122,14 @@ class Api:
             graph=merge_step.output,
         )
         self.executor.execute_all([compress_step])
+
+        assert compress_step.output
+        logging.info("defining communities")
+        community_step = Step_DefineCommunitiesLouvain(
+            self.config,
+            graph=compress_step.output,
+        )
+        self.executor.execute_all([community_step])
 
         print("DONE FOR NOW!")
 

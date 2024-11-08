@@ -69,12 +69,6 @@ class BuildStepOutput_BaseGraph(MiniKgBuildPlanStepOutput, Generic[GT], abc.ABC)
         self.G = G
         return
 
-    # @abc.abstractmethod
-    # @staticmethod
-    # def get_graph_type() -> type[GT]:
-    #     raise NotImplementedError()
-
-
     def to_file(self, path: Path) -> None:
         graph_bytes = pickle.dumps(self.G)
         json_data = json.dumps(
@@ -133,6 +127,30 @@ class BuildStepOutput_Chunks(MiniKgBuildPlanStepOutput):
             data = json.loads(f.read())
             chunks = [FileFragment.model_validate(chunk) for chunk in data["chunks"]]
             return BuildStepOutput_Chunks(chunks=chunks)
+
+    pass
+
+
+class BuildStepOutput_Communities(MiniKgBuildPlanStepOutput):
+    def __init__(self, communities: list[list[str]]):
+        self.communities = communities
+        return
+
+    def to_file(self, path: Path) -> None:
+        with open(path, "w") as f:
+            f.write(json.dumps(self.communities))
+            pass
+        return
+
+    @classmethod
+    def from_file(cls, path: Path) -> "BuildStepOutput_Communities":
+        communities: list[list[str]]
+        with open(path, "r") as f:
+            communities = json.load(f)
+            pass
+        return cls(
+            communities,
+        )
 
     pass
 
