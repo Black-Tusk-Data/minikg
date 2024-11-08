@@ -18,7 +18,7 @@ class Step_CompressRedundantEdges(MiniKgBuilderStep[BuildStepOutput_MultiGraph])
         return
 
     def get_id(self) -> str:
-        return self.graph.label
+        return f"compressed-redundant:{self.graph.label}"
 
     @staticmethod
     def get_output_type():
@@ -28,10 +28,9 @@ class Step_CompressRedundantEdges(MiniKgBuilderStep[BuildStepOutput_MultiGraph])
         compressor = GraphEdgeCompressor(self.config, G=self.graph.G)
         compressed_graph = compressor.compress_redundant()
 
-        graph_label = f"compressed-redundant-{self.graph.label}"
         return BuildStepOutput_MultiGraph(
             G=compressed_graph,
-            label=graph_label,
+            label=self.get_id(),
         )
 
     pass
