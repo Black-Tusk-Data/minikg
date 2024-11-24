@@ -6,7 +6,7 @@ import abc
 from typing import Generic, Type, TypeVar, cast
 
 from expert_llm.models import ChatBlock
-from expert_llm.remote.openai_shaped_client_implementations import OpenAIApiClient
+from expert_llm.remote.openai_shaped_client_implementations import OpenAIApiClient, TogetherAiClient
 from pydantic import Field, create_model, BaseModel
 
 from minikg.models import CompletionShape, FileFragment, MiniKgConfig
@@ -26,6 +26,8 @@ class BaseExtractor(Generic[T], abc.ABC):
         self.fragment = fragment
         # TODO: make this configurable
         self.llm_client = OpenAIApiClient("gpt-4o")
+        # self.llm_client = TogetherAiClient("meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo")
+
         # self.output_model = create_model(
         #     f"Output-{self.__class__.__name__}",
         #     extractions=(list[self._get_llm_extraction_item_shape()], Field(
@@ -90,8 +92,8 @@ class BaseExtractor(Generic[T], abc.ABC):
                 },
             },
             output_schema_name="Extractions",
+            max_tokens=16000,   # pretty much the max
         )
-        print("RES:", res)
         return [response_type.model_validate(row) for row in res["extractions"]]
 
     def _post_process(self, extractions: list[T]) -> list[T]:

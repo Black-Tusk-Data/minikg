@@ -20,7 +20,7 @@ class Splitter:
             lines = f.readlines()
             pass
 
-        lo, hi = 0, self.config.max_chunk_lines
+        lo, hi = 0, min([self.config.max_chunk_lines, len(lines)])
         while hi <= len(lines):
             fragments.append(
                 FileFragment(
@@ -33,6 +33,7 @@ class Splitter:
             lo += self.window_offset
             hi += self.window_offset
             pass
+
         return fragments
 
     pass

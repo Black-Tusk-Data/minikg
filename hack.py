@@ -20,21 +20,48 @@ from minikg.models import MiniKgConfig
 
 
 
-
 config = MiniKgConfig(
-    knowledge_domain="Physics history",
+
+    # knowledge_domain="Physics history",
+    # entity_types=[
+    #     "PERSON",
+    #     "PLACE",
+    #     "EVENT",
+    #     "ORGANIZATION",
+    #     "SCIENTIFIC DISCOVERY",
+    # ],
+    # input_dir=Path("./tmp"),
+
+    knowledge_domain="Software engineering",
+    entity_types=[
+        "MODULE",
+        "CLASS",
+        "FUNCTION",
+        "CODE_EXAMPLE",
+        "CONCEPT",
+    ],
     input_dir=Path("./input"),
+    # document_desc="",
+
     persist_dir=Path("./cache"),
     input_file_exp="**/*.txt",
-    max_chunk_lines=200,
-    chunk_overlap_lines=20,
+    max_chunk_lines=50,
+    chunk_overlap_lines=5,
+    version=1,
 )
 
 
 def main():
-    logging.info("BEGIN")
+    # from IPython import embed; embed()
     api = Api(config=config)
-    api.build_kg()
+    # api.build_kg()
+    # api.visualize_kg()
+
+    r = api.search_kg(
+        "How can I most easily implement a persistent key-value store in Python?",
+        k=3
+    )
+    print("R:", r)
     return
 
 

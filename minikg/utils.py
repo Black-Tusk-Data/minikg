@@ -1,3 +1,4 @@
+from pathlib import Path
 import numpy as np
 
 
@@ -14,9 +15,9 @@ def scrub_title_key(d: dict):
 
 
 def cluster_from_similarities(
-        *,
-        pairwise_similarities: np.ndarray,
-        threshold_similarity: float,
+    *,
+    pairwise_similarities: np.ndarray,
+    threshold_similarity: float,
 ) -> list[list[int]]:
     """
     Returns a list of clusters.
@@ -56,3 +57,27 @@ def cluster_from_similarities(
         pass
 
     return clusters
+
+
+def draw_graph(G, path: Path):
+    import pygraphviz as pgv
+
+    G_viz = pgv.AGraph()
+    for node in G.nodes:
+        G_viz.add_node(
+            node,
+            label="\n".join([
+                node,
+                G.nodes[node]["entity_type"],
+            ]),
+        )
+        pass
+    for edge in G.edges:
+        G_viz.add_edge(
+            (edge[0], edge[1]),
+            label=G.edges[edge]["description"],
+        )
+        pass
+
+    G_viz.draw(path, prog="dot")
+    return

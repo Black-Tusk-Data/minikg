@@ -4,8 +4,13 @@ from pathlib import Path
 import networkx as nx
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
-from minikg.models import BuildStepOutput_Chunks, BuildStepOutput_Graph, MiniKgConfig
+from minikg.models import MiniKgConfig
 from minikg.splitter import Splitter
+from minikg.build_output import (
+    BuildStepOutput_Chunks,
+    BuildStepOutput_Graph,
+    BuildStepOutput_MultiGraph,
+)
 
 
 class Step_SplitDoc(MiniKgBuilderStep[BuildStepOutput_Chunks]):

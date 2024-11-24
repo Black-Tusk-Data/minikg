@@ -6,13 +6,18 @@ import os
 from pathlib import Path
 from typing import Generic, TypeVar
 
+from minikg.build_output import BuildStepOutput_Package
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.build_steps.step_compress_kg_edges import Step_CompressRedundantEdges
 from minikg.build_steps.step_define_communities import Step_DefineCommunitiesLouvain
 from minikg.build_steps.step_extract_chunk_kg import Step_ExtractChunkKg
+from minikg.build_steps.step_index_community import Step_IndexCommunity
 from minikg.build_steps.step_merge_kgs import Step_MergeKgs
+from minikg.build_steps.step_package import Step_Package
 from minikg.build_steps.step_split_doc import Step_SplitDoc
 from minikg.graph_edge_compressor import GraphEdgeCompressor
+from minikg.graph_semantic_db import GraphSemanticDb
+from minikg.kg_searcher import KgCommunitiesSearcher
 from minikg.models import MiniKgConfig
 
 
@@ -76,6 +81,14 @@ class Api:
             pass
         return
 
+    def _load_package(self) -> BuildStepOutput_Package:
+        return BuildStepOutput_Package.from_file(
+            # bit hackish this handover here...
+            self.config.persist_dir
+            / "Step_Package"
+            / str(self.config.version)
+        )
+
     def _gather_input_files(self) -> list[Path]:
         return list(self.config.input_dir.rglob(self.config.input_file_exp))
         # return [
@@ -101,7 +114,7 @@ class Api:
             Step_ExtractChunkKg(self.config, fragment=fragment)
             for split_doc in split_doc_steps
             for fragment in split_doc.output.chunks
-        ]
+        ][:1935]
         extract_chunk_kg_steps = self.executor.execute_all(extract_chunk_kg_steps)
 
         logging.info("merging knowledge graphs")
@@ -112,8 +125,7 @@ class Api:
             self.config,
             graphs=graphs_to_merge,
         )
-        self.executor.execute_all([merge_step])
-
+        merge_step = self.executor.execute_all([merge_step])[0]
 
         assert merge_step.output
         logging.info("compressing redundant knowledge graph edges")
@@ -121,7 +133,7 @@ class Api:
             self.config,
             graph=merge_step.output,
         )
-        self.executor.execute_all([compress_step])
+        compress_step = self.executor.execute_all([compress_step])[0]
 
         assert compress_step.output
         logging.info("defining communities")
@@ -129,13 +141,87 @@ class Api:
             self.config,
             graph=compress_step.output,
         )
-        self.executor.execute_all([community_step])
+        community_step = self.executor.execute_all([community_step])[0]
+
+        assert community_step.output
+        index_community_steps = [
+            Step_IndexCommunity(
+                self.config,
+                master_graph=compress_step.output,
+                community=community,
+                community_name=f"community-{i}",
+            )
+            for i, community in enumerate(community_step.output.communities)
+        ]
+        index_community_steps = self.executor.execute_all(index_community_steps)
+
+        # wrap this all up in a way that's easy to load from disk
+        assert all([step.output for step in index_community_steps])
+        packge_step = self.executor.execute_all(
+            [
+                Step_Package(
+                    self.config,
+                    master_graph=compress_step.output,
+                    communities=community_step.output,
+                    community_indexes=[step.output for step in index_community_steps],
+                )
+            ]
+        )[0]
 
         print("DONE FOR NOW!")
-
-        # build community KG
         return
 
+    def search_kg(self, query: str, k: int):
+        package = self._load_package()
+        # we are not taking advantage of the 'master_graph' at this time
+
+        searcher = KgCommunitiesSearcher(
+            self.config,
+            community_names=package.community_db_names,
+            community_graph_dbs=[
+                GraphSemanticDb(self.config, name=name)
+                for name in package.community_db_names
+            ],
+        )
+
+        return searcher.answer(query, k=k)
+
+    def visualize_kg(self):
+        import pygraphviz as pgv
+
+        package = self._load_package()
+        os.system("rm -rf ./community-viz")
+        os.system("mkdir ./community-viz")
+
+        for community, community_name in zip(
+                package.communities,
+                package.community_db_names,
+        ):
+            subgraph = package.G.subgraph(community)
+
+            G_viz = pgv.AGraph()
+            for node in subgraph.nodes:
+                G_viz.add_node(
+                    node,
+                    label="\n".join([
+                        node,
+                        package.G.nodes[node]["entity_type"],
+                    ]),
+                )
+                pass
+            for edge in subgraph.edges:
+                G_viz.add_edge(
+                    (edge[0], edge[1]),
+                    label=package.G.edges[edge]["description"],
+                )
+                pass
+
+            G_viz.draw(f"./{community_name}.png", prog="dot")
+            pass
+
+        return
+
+    # TODO
     def update_kg(
         self,
         source_paths: list[Path],

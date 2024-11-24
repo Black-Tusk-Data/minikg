@@ -5,7 +5,8 @@ import networkx as nx
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_merger import GraphMerger
-from minikg.models import BuildStepOutput_Graph, BuildStepOutput_MultiGraph, MiniKgConfig
+from minikg.models import MiniKgConfig
+from minikg.build_output import BuildStepOutput_Graph, BuildStepOutput_MultiGraph
 
 
 class Step_MergeKgs(MiniKgBuilderStep[BuildStepOutput_MultiGraph]):
@@ -27,14 +28,10 @@ class Step_MergeKgs(MiniKgBuilderStep[BuildStepOutput_MultiGraph]):
         # these start to get too long, so we'll hash
         md5_hash = md5()
         md5_hash.update(
-            ":".join(sorted([
-                graph.label for graph in self.graphs
-            ])).encode("utf-8")
+            ":".join(sorted([graph.label for graph in self.graphs])).encode("utf-8")
         )
         digest = md5_hash.digest()
-        return base64.urlsafe_b64encode(
-            digest
-        ).decode("utf-8")
+        return base64.urlsafe_b64encode(digest).decode("utf-8")
 
     @staticmethod
     def get_output_type():

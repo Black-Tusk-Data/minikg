@@ -1,16 +1,19 @@
 import logging
+import pickle
 from expert_llm.models import ChatBlock
+from expert_llm.remote.jina_ai_client import JinaAiClient
 from expert_llm.remote.openai_shaped_client_implementations import OpenAIApiClient
 
 from minikg import utils
 from sklearn.metrics.pairwise import cosine_similarity
 import networkx as nx
 
-from minikg.models import MiniKgConfig
+from minikg.models import GraphType, MiniKgConfig
 
 
 class GraphEdgeCompressor:
     THRESHOLD_SIMILARITY = 0.8
+    BACKUP_INTERVAL = 100
 
     def __init__(
         self,
@@ -21,43 +24,70 @@ class GraphEdgeCompressor:
         self.config = config
         self.G = G
         self.llm_client = OpenAIApiClient("gpt-4o")
-        self.embedding_client = OpenAIApiClient("text-embedding-3-small")
+        self.embedding_client = JinaAiClient("jina-embeddings-v3")
+        self.graph_cache = self.config.persist_dir / f"compress-cache-v{self.config.version}"
         return
 
+    def _backup(self, G_new: GraphType) -> None:
+        logging.info(
+            "saving partially compressed graph with %d edges",
+            len(G_new.edges),
+        )
+        with open(self.graph_cache, "wb") as f:
+            pickle.dump(G_new, f)
+            pass
+        return
+
+    def _load_from_backup(self) -> GraphType | None:
+        if not self.graph_cache.exists():
+            return None
+        with open(self.graph_cache, "rb") as f:
+            logging.info("found partially compressed graph!")
+            return pickle.load(f)
+        pass
+
     def _summarize_edge_descriptions(
-            self,
-            *,
-            between_node_names: tuple[str, str],
-            edge_descriptions: list[str],
+        self,
+        *,
+        between_node_names: tuple[str, str],
+        edge_descriptions: list[str],
     ) -> str:
-        r = self.llm_client.chat_completion([
-            ChatBlock(
-                role="system",
-                content=f"You are a helpful {self.config.knowledge_domain} expert.",
-            ),
-            ChatBlock(
-                role="user",
-                content="\n".join([
-                    " ".join([
-                        "Summarize the relationship between",
-                        between_node_names[0], "and", between_node_names[1],
-                        "Given the following information about their relationship.",
-                        "Your summary should be based ONLY upon the following information:",
-                    ]),
-                    *edge_descriptions,
-                ]),
-            ),
-        ])
+        r = self.llm_client.chat_completion(
+            [
+                ChatBlock(
+                    role="system",
+                    content=f"You are a helpful {self.config.knowledge_domain} expert.",
+                ),
+                ChatBlock(
+                    role="user",
+                    content="\n".join(
+                        [
+                            " ".join(
+                                [
+                                    "Summarize the relationship between",
+                                    between_node_names[0],
+                                    "and",
+                                    between_node_names[1],
+                                    "Given the following information about their relationship.",
+                                    "Your summary should be based ONLY upon the following information:",
+                                ]
+                            ),
+                            *edge_descriptions,
+                        ]
+                    ),
+                ),
+            ]
+        )
         return r.content
 
     def _copy_nodes(
-            self,
-            G_new: nx.Graph | nx.MultiGraph,
+        self,
+        G_new: nx.Graph | nx.MultiGraph,
     ) -> None:
         for node_label in self.G.nodes:
             G_new.add_node(
                 node_label,
-                **self.G[node_label],
+                **self.G.nodes[node_label],
             )
             pass
         return
@@ -71,10 +101,16 @@ class GraphEdgeCompressor:
 
         (This enables the Louvain community-detection algorithm)
         """
-        G_new = nx.MultiGraph()
+        G_new = self._load_from_backup() or nx.MultiGraph()
         self._copy_nodes(G_new)
+        logging.info("compressing %d edges", len(self.G.edges))
 
+        i = 0
         for u, v, idx in self.G.edges:
+            i += 1
+            if i % self.BACKUP_INTERVAL == 0:
+                self._backup(G_new)
+                pass
             if G_new.has_edge(u, v):
                 continue
             # grab all the edges between u and v
@@ -86,10 +122,10 @@ class GraphEdgeCompressor:
                     **self.G.edges[u, v, idx],
                 )
                 continue
-            description_embeddings = [
-                self.embedding_client.compute_embedding(self.G.edges[edge]["description"])
+            description_embeddings = self.embedding_client.embed([
+                self.G.edges[edge]["description"]
                 for edge in uv_edges
-            ]
+            ])
             similarities = cosine_similarity(description_embeddings)
             # partition into clusters, pick a leader
             clusters = utils.cluster_from_similarities(
@@ -103,10 +139,7 @@ class GraphEdgeCompressor:
             )
 
             # we'll just take the first entry of each cluster as the 'leader'
-            compressed_edge_indexes = [
-                cluster[0]
-                for cluster in clusters
-            ]
+            compressed_edge_indexes = [cluster[0] for cluster in clusters]
             for edge_idx in compressed_edge_indexes:
                 edge = uv_edges[edge_idx]
                 G_new.add_edge(
@@ -129,7 +162,7 @@ class GraphEdgeCompressor:
         G_new = nx.Graph()
         self._copy_nodes(G_new)
 
-        for u, v, idx in self.G.edges: # multi-graphs have a third item in the tuple
+        for u, v, idx in self.G.edges:  # multi-graphs have a third item in the tuple
             # TODO we're assuming that all the edge descriptions will fit into a prompt
             if G_new.has_edge(u, v):
                 continue
@@ -145,16 +178,16 @@ class GraphEdgeCompressor:
             summarized_description = self._summarize_edge_descriptions(
                 between_node_names=(u, v),
                 edge_descriptions=[
-                    self.G.edges[edge]["description"]
-                    for edge in edges_to_summarize
-                ]
+                    self.G.edges[edge]["description"] for edge in edges_to_summarize
+                ],
             )
-            total_weight = sum([
-                self.G.edges[edge]["weight"]
-                for edge in edges_to_summarize
-            ])
+            total_weight = sum(
+                [self.G.edges[edge]["weight"] for edge in edges_to_summarize]
+            )
             # / len(edges_to_summarize)
-            G_new.add_edge(u, v, description=summarized_description, weight=total_weight)
+            G_new.add_edge(
+                u, v, description=summarized_description, weight=total_weight
+            )
             pass
         return G_new
 

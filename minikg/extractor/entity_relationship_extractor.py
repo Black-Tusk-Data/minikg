@@ -38,7 +38,7 @@ class EntityRelationshipExtractor(BaseExtractor[EntityRelationship]):
     def _get_user_prompt_lines(self) -> list[str]:
         return [
             "-GOAL-",
-            "Given a text document that is potentially relevant to this activity and a list of entity types, identify all the meaningful relationships between those entities.",
+            f"Given a {self.config.document_desc} that is potentially relevant to this activity and a list of entities, identify all the meaningful relationships between those entities.",
             "-ENTITIES-",
             self._get_all_entities_blurb(),
             "-TEXT-",

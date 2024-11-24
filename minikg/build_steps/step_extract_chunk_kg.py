@@ -6,7 +6,8 @@ from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.extractor import entity_relationship_extractor
 from minikg.extractor.entity_extractor import EntityExtractor
 from minikg.extractor.entity_relationship_extractor import EntityRelationshipExtractor
-from minikg.models import BuildStepOutput_Graph, FileFragment, MiniKgConfig
+from minikg.models import FileFragment, MiniKgConfig
+from minikg.build_output import BuildStepOutput_Graph
 
 
 class Step_ExtractChunkKg(MiniKgBuilderStep[BuildStepOutput_Graph]):
@@ -44,7 +45,7 @@ class Step_ExtractChunkKg(MiniKgBuilderStep[BuildStepOutput_Graph]):
         for entity in entities:
             G.add_node(
                 entity.name,
-                labels=entity.labels,
+                entity_type=entity.entity_type,
                 description=entity.description,
             )
             pass

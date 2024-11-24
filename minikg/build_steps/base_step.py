@@ -4,7 +4,8 @@ import os
 from pathlib import Path
 from typing import Generic, Type, TypeVar
 
-from minikg.models import MiniKgBuildPlanStepOutput, MiniKgConfig
+from minikg.models import MiniKgConfig
+from minikg.build_output import MiniKgBuildPlanStepOutput
 
 
 T = TypeVar("T", bound=MiniKgBuildPlanStepOutput)

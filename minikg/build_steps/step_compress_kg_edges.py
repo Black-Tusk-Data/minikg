@@ -3,7 +3,8 @@ import networkx as nx
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_edge_compressor import GraphEdgeCompressor
 from minikg.graph_merger import GraphMerger
-from minikg.models import BuildStepOutput_Graph, BuildStepOutput_MultiGraph, MiniKgConfig
+from minikg.models import MiniKgConfig
+from minikg.build_output import BuildStepOutput_Graph, BuildStepOutput_MultiGraph
 
 
 class Step_CompressRedundantEdges(MiniKgBuilderStep[BuildStepOutput_MultiGraph]):

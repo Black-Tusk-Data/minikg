@@ -15,10 +15,20 @@ class EntityExtractor(BaseExtractor[Entity]):
             pass
         return extractions
 
+    def _get_llm_extraction_item_shape(self) -> dict:
+        raw = Entity.prompt_json_schema()
+        # TODO: find a more elegant way to do this...
+        raw["properties"]["entity_type"]["enum"] = self.config.entity_types
+        return raw
+
     def _get_user_prompt_lines(self) -> list[str]:
         return [
             "-GOAL-",
-            "Given a text document that is potentially relevant to this activity, identify all the entities from within that text that capture the information and ideas it contains.",
+            f"Given a {self.config.document_desc} that is potentially relevant to this activity, identify all entities from within that text that capture the information and ideas it contains.",
+            " ".join([
+                "Only identify entities of the following types:",
+                *self.config.entity_types,
+            ]),
             "-TEXT-",
             self._get_fragment_contents(),
         ]

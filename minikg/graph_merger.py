@@ -8,7 +8,7 @@ class GraphMerger:
         self,
         config: MiniKgConfig,
         *,
-        graphs: list[nx.Graph], # TODO: could be multigraph already
+        graphs: list[nx.Graph],  # TODO: could be multigraph already
     ):
         self.config = config
         self.graphs = graphs
@@ -25,7 +25,7 @@ class GraphMerger:
                     continue
                 G_new.add_node(
                     node_label,
-                    **G[node_label],
+                    **G.nodes[node_label],
                 )
                 pass
             pass
