@@ -50,7 +50,7 @@ def main():
         "How does Meta plan to profit from its open language models?",
         k=3
     )
-    print(r)
+    print(json.dumps(r, indent=2))
     return
 
 

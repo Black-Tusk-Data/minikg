@@ -80,6 +80,76 @@ class KgCommunitiesSearcher:
             for i, result in enumerate(relevant_communities)
         }
 
+    def check_answer_is_relevant(
+            self,
+            *,
+            query: str,
+            answer: str,
+    ) -> bool:
+        relevance_result = self.llm_client.structured_completion_raw(
+            chat_blocks=[
+                ChatBlock(
+                    role="user",
+                    content="\n".join(
+                        [
+                            (
+                                "Does the following text passage help to answer the query"
+                                f""" "{query}"?"""
+                            ),
+                            "TEXT PASSAGE:",
+                            answer,
+                        ]
+                    ),
+                ),
+            ],
+            output_schema={
+                "type": "object",
+                "required": ["is_useful"],
+                "properties": {
+                    "is_useful": {
+                        "type": "boolean",
+                        "description": "Whether or not the text passage is useful to answering the query.",
+                    },
+                },
+            },
+        )
+        return relevance_result["is_useful"]
+
+    def check_statement_is_grounded(
+            self,
+            *,
+            statement: str,
+            context: str,
+    ) -> bool:
+        grounded_result = self.llm_client.structured_completion_raw(
+            chat_blocks=[
+                ChatBlock(
+                    role="user",
+                    content="\n".join(
+                        [
+                            (
+                                "Does the following statement rely COMPLETELY on information from the following text passage? "
+                                f""" "{statement}"?"""
+                            ),
+                            "TEXT PASSAGE:",
+                            context,
+                        ]
+                    ),
+                ),
+            ],
+            output_schema={
+                "type": "object",
+                "required": ["completely_reliant"],
+                "properties": {
+                    "completely_reliant": {
+                        "type": "boolean",
+                        "description": "Whether or not the statement is completely reliant on information from the text passage.",
+                    },
+                },
+            },
+        )
+        return grounded_result["completely_reliant"]
+
     def answer(self, query: str, k: int) -> dict[str, str]:
         """
         Returns [community_name] -> community_response,
@@ -115,39 +185,19 @@ class KgCommunitiesSearcher:
                 ]
             )
             # ensure that the response is relevant
-            relevance_result = self.llm_client.structured_completion_raw(
-                chat_blocks=[
-                    ChatBlock(
-                        role="user",
-                        content="\n".join(
-                            [
-                                (
-                                    "Is the following text passage relevant to the query"
-                                    f""" "{query}"?"""
-                                ),
-                                "TEXT PASSAGE:",
-                                community_answer.content,
-                            ]
-                        ),
-                    ),
-                ],
-                output_schema={
-                    "type": "object",
-                    "required": ["is_relevant"],
-                    "properties": {
-                        "is_relevant": {
-                            "type": "boolean",
-                            "description": "Whether or not the text passage is relevant.",
-                        },
-                    },
-                },
-            )
-            if relevance_result["is_relevant"]:
-                responses[community_name] = community_answer.content
-                pass
-            else:
+            if not self.check_answer_is_relevant(query=query, answer=community_answer.content):
                 logging.debug("community %s answer deemed irrelevant", community_name)
-                pass
+                continue
+
+            if not self.check_statement_is_grounded(
+                    statement=community_answer.content,
+                    context=context,
+            ):
+                logging.debug("community %s answer deemed ungrounded", community_name)
+                continue
+
+            # otherwise, all good
+            responses[community_name] = community_answer.content
             pass
 
         if not responses:
@@ -173,7 +223,7 @@ class KgCommunitiesSearcher:
                 ),
             ]
         )
-        responses["FINAL"] = final_answer
+        responses["FINAL"] = final_answer.content
         return responses
 
     pass
