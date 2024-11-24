@@ -3,3 +3,4 @@ venv/
 input/
 cache/
 build/
+*.egg-info/

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import logging
 import os
 
@@ -35,17 +36,21 @@ config = MiniKgConfig(
     persist_dir=Path("./cache"),
     input_file_exp="**/*.txt",
     max_chunk_lines=30,
-    chunk_overlap_lines=5,
+    chunk_overlap_lines=2,
     version=1,
 )
 
 
 def main():
-    # from IPython import embed; embed()
     api = Api(config=config)
-    api.build_kg()
+    # api.build_kg()
     # api.visualize_kg()
 
+    r = api.search_kg(
+        "How does Meta plan to profit from its open language models?",
+        k=3
+    )
+    print(r)
     return
 
 
