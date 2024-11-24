@@ -1,0 +1,502 @@
+Meta Platforms, Inc. (META)
+Second Quarter 2024 Results Follow Up Call
+July 31st, 2024
+Operator:
+
+Good afternoon. My name is Krista and I will be your conference operator
+today. At this time, I would like to welcome everyone to Meta's Second
+Quarter Results Follow-Up Q&A Call.
+All lines have been placed on mute to prevent any background noise. After the
+speaker's remarks, there will be a question-and-answer session. If you would
+like to ask a question, please press star one on your telephone keypad. To
+withdraw your question, again press star one. We ask that you limit yourself to
+one question. And this call will be recorded. Thank you very much. Kenneth
+Dorell, Meta's Director of Investor Relations, you may begin.
+
+Kenneth Dorell:
+
+Thank you. Good afternoon and welcome to the Follow-Up Q&A call. With me
+on today's call are Susan Li, CFO, and Chad Heaton, VP of Finance.
+Before we get started, I would like to take this opportunity to remind you that
+our remarks today will include forward-looking statements. Actual results may
+differ materially from those contemplated by these forward-looking
+statements. Factors that could cause these results to differ materially are set
+forth in today's earnings press release and in our quarterly report on Form 10-Q
+filed with the SEC.
+Any forward-looking statements that we make on this call are based on
+assumptions as of today and we undertake no obligation to update these
+statements as a result of new information or future events. During this call, we
+will present both GAAP and certain non-GAAP financial measures. A
+reconciliation of GAAP to non-GAAP measures is included in today's earnings
+press release.
+The earnings press release and an accompanying investor presentation are
+available on our website at investor.fb.com. And now I'd like to turn the call
+back over to the operator for the first question.
+
+Operator:
+
+Thank you. We will now open the lines for a question-and-answer session. To
+ask a question, please press star one on your touchtone phone. To withdraw
+your question, again press star one. We ask that you limit yourself to one
+question. Please pick up your handset before asking your question to ensure
+clarity. If you are streaming today’s call, please mute your computer speakers.
+And your first question comes from Michael Nathanson with Moffett
+Nathanson. Please go ahead.
+1
+
+Michael Nathanson: Thanks. I just have two quick ones on cost view. In your answer on
+employee headcount growth, you talk about a ramp in employee hiring. We've
+already seen that come through the past couple quarters. Anyway, can you
+help us frame how you think about the normal level of headcount growth from
+this point on?
+And then we talk about meaningful expansion of losses at Reality Labs. What
+are the factors that would contribute to that maybe change in the run rate
+we've seen? Is depreciation a factor as you increase CapEx? Anything on the
+factors driving Reality Lab losses would be helpful. Thanks.
+Susan Li:
+
+Thanks, Michael. On your first question -- coming into this year, we talked
+about how we were basically working through a hiring underrun that was a
+result of a prolonged hiring freeze that we had last year.
+And so that is the bulk of what you're seeing the hiring that has happened in
+2024 represent. so basically working through the hiring underrun is where the
+majority of hiring is going now. We aren't giving guidance for 2025, in part
+because we haven't started our budget, but generally, our approach towards
+headcount allocation is to really be taking a pretty ruthless look at, what places
+we can we shift resources from -- areas that are sort of no longer particularly
+critical or high priority, to the highest priority areas going into 2025.
+So, I expect that we will be very focused in the parts of the company that are
+growing heads, and I expect we'll be pretty disciplined about the longer-term
+headcount trajectory.
+On your second question, we haven't updated any of the guidance on Reality
+Labs. I think we reiterated the prior guidance on Reality Labs. So, I don't think
+I said anything about a change in run rate. Our expectations for Reality Labs, of
+course encompass the full set of ambitions in the area, both our work in MR, in
+AR, in the Metaverse.
+So we are investing really across a pretty broad array of efforts there. Within
+that envelope, we are certainly seeing that we are shifting some energy
+towards AR glasses in particular. I think the traction that we have seen with
+the Ray-Ban Meta glasses and the product market fit and demand for the
+product out of the market, and the overlap with our AI efforts where the
+glasses form factor is really such an intuitive way to bring an AI assistant with
+you around that sees what you see and hears what you hear. So, we're
+definitely trying to accelerate our glasses efforts in the Reality Lab space.
+
+2
+
+Operator:
+
+Your next question comes from the line of James Lee with Mizuho. Please go
+ahead.
+
+James Lee:
+
+Great. Thanks for taking my questions here. Susan, when you look at search
+results on Meta AI, does that help you maybe improve commercial intent and
+relevancy for your ad targeting? For example, I was thinking of maybe travel,
+people searching for travel, people searching for local advertising, maybe
+looking for a gym nearby.
+And secondly, and just to double-click on your prior statement about investing
+ahead, but we'll also offset by increased efficiency, maybe help us understand
+that approach a little bit. This approach here is to neutralize maybe high
+depreciation expenses with high efficiency? Can you help us understand where
+you are looking within the organization to lower your cost base? Thank you.
+
+Susan Li:
+
+Thanks, James. So, in terms of, the types of queries that we're seeing on Meta
+AI, we're seeing early signs that Meta AI is helping people leverage our apps for
+a range of new use cases. We see that a lot of people are using Meta AI for
+learning and information gathering type use cases, things like how-to advice,
+knowledge-based questions, writing assistance. We're also seeing a large
+number of people find value in using Meta AI for coaching.
+So, there's a range of queries. We're pretty early in the journey with Meta AI
+and I think that, over the coming quarters, we are going to continue to iterate
+on it. We're going to broaden availability to new languages and countries and
+that's going to help us. We're going to ship new features and improvements,
+and that's going to help us make the Meta AI experience increasingly rich and
+engaging for people, which is really where our primary focus is right now.
+On the second question about headcount -- being disciplined about the way
+that we are thinking about allocating headcount. This is a place where we are
+really trying to be very disciplined and ruthless about the way we are
+prioritizing in here, in part because it allows us to invest in infrastructure, which
+is just such a critical part of our AI ambitions right now.
+
+Operator:
+
+Your next question comes from the line of Ken Gawrelski with Wells Fargo.
+Please go ahead.
+
+Ken Gawrelski:
+
+Thank you. Hi, Susan. Two questions, please. First, on the growth mix, it
+shifted more to pricing from just from impression growth. How should we
+think about the balance between impression growth and pricing going forward
+and what does that mean for '25 and '26 growth drivers? Are you looking to
+achieve some kind of balance there?
+3
+
+And then maybe on the second, and this is more kind of an ecosystem question
+on the AI side, is how far in Meta's view are we away from seeing a proliferation
+of third-party AI applications? We've seen some select AI applications mostly
+from the largest scale spenders today, but when do we see the ecosystem
+flourish like we did with mobile internet or desktop internet? Is this an element
+of time or is it capabilities on the model side? Thanks.
+Susan Li:
+
+Thanks, Ken. Taking your question in pieces. So, on the first question, the
+trends in impression growth and price per ad growth are somewhat related
+because we are operating an auction.
+So, the year-over-year growth in reported price per ad may have accelerated
+from Q1, but there's a lot that goes into that, not least of which are the auction
+dynamics that come from impression growth slowing down from Q1.
+Now one thing we keep a close eye on in order to understand the value that
+advertisers are getting from their ads is the average cost per action, and that is
+a complex metric for us because there are many different objectives that
+advertisers optimize for and those different objectives can have quite different
+values depending on whether it's an app install or a web conversion, et cetera.
+But overall, we feel good about the cost per action trends we're seeing. We
+think that those are healthy. And as we continue to get better at driving
+conversions for advertisers, that will have the effect of lifting price per
+impression over time because we're delivering more conversions per
+impression served, meaning the impressions are higher value, which is the way
+that I would frame it as opposed to impressions getting more expensive.
+And ultimately, driving conversions for advertisers is really what we are trying
+to do as opposed to, for example, optimize for a particular price or just drive
+impressions independently of conversions.
+On the second question, which is about the proliferation of third-party AI
+applications and when that will happen. It's clearly, I think, very early in the
+development of that ecosystem. But as Mark said, the pace of capability
+development is really what is getting ourselves and our peers excited, and just
+the pace at which the models are advancing and then our ability to build on
+those to create good tools for creators.
+And so, we announced that we're rolling out AI Studio in the U.S. That enables
+people to create AI characters which are fully customizable and conversational
+Ais. You can do it from a template, you can do it from scratch based on your
+4
+
+personal interests. And then Creator AIs are extension of characters and
+creators can build an AI within Instagram or on the web that can answer
+common DM type questions and Story replies and they can use that to connect
+with their followers.
+So, we're excited about the opportunity for both of those to become really
+useful features and for a healthy and active Creator AI ecosystem to flourish on
+top of the tools that we are building.
+Operator:
+
+Your next question comes from the line of Dan Salmon with New Street
+Research. Please go ahead.
+
+Daniel Salmon:
+
+Okay, great. Good afternoon, everyone. Susan, your outlook comments
+obviously emphasize the growth of infrastructure-related costs in 2025. Could
+you add a little bit of color on how that might impact different expense lines?
+We assume that's mostly in cost of revenue, but maybe there's some in R&D as
+well.
+And then any color on the balance of depreciation versus cash expenses that
+you can add? Just love to hear any more that can help us out with the models
+tonight.
+
+Susan Li:
+
+Thank you, Dan, for the question. So, as it pertains to CapEx, one of the things I
+want to be really clear about is we have seen significant growth this year in
+CapEx. We expect another year of significant growth in 2025. And, we are not
+in a position to quantify this yet, as I mentioned on the call, in part because the
+infrastructure planning process is -- it's very dynamic.
+In fact, when you are trying to build large training clusters and to land the
+capacity that you need, you often end up spinning up multiple projects and
+parallel pathing multiple options because there are many reasons why one
+option or another will end up not becoming feasible in the process of trying to
+build capacity.
+So, for us, a lot of the uncertainty in 2025 comes around evaluating those
+parallel paths and the fact that there's a lot of uncertainty about how each
+individual path may pan out. But, again, we think, in all cases that we expect
+that 2025 will be another year of significant CapEx growth.
+Now, to the specific question about how it might impact expense lines. It is
+both in cost of revenue and R&D. The expenses that flow through R&D really
+capture the depreciation and operating expenses of the infrastructure that is
+used to support AI research across the company. And then the expenses that
+5
+
+flow through cost of revenue really are more around supporting the sort of core
+ads ranking and recommendation use cases.
+We haven't really commented on the mix of depreciation versus cash expenses
+next year. Obviously, depreciation is from the footprint that we've already built
+flowing through but we are also commencing new projects in '25 that will
+require cash outlays and then we'll end up depreciating through future year
+P&Ls.
+Operator:
+
+Your next question comes from the line of Rob Sanderson with Loop Capital
+Markets. Please go ahead.
+
+Rob Sanderson:
+
+Yes, thank you. Thanks for taking the question. I want to go back and revisit
+commentary you shared last quarter, or Mark was sharing last quarter, just on
+the discussion for potential of revenue displacement as you invest in scaling up
+GenAI products. And I think the general interpretation was this was maybe a
+shift in AI capacity away from core AI into strategic AI, obviously core AI driving
+monetization today, GenAI, no near-term monetization.
+So, first, is that the correct interpretation? And if so, are you talking about a
+shift of allocation of new capacity or are we actually shifting some capacity
+away from core?
+And then second on that is, does the decision to delay training in the EU
+provide any relief on capacity demands?
+
+Susan Li:
+
+Thanks, Rob. So, on the first question, clarifying the comments from last
+quarter. Our compute needs outstrip our available data center capacity right
+now. Given the focus that we have on accelerating our GenAI efforts, the new
+capacity that we've been bringing online is really going more towards GenAI
+than towards other workloads.
+We've also had to do a little bit of shifting capacity around to free up capacity
+for GenAI training. And altogether, we expect that that will result in some
+foregone revenue growth from ads and organic content ranking improvements
+that we would have otherwise made, but that has been factored into our Q3
+outlook. And we generally expect this to be to be a near term dynamic until we
+start bringing additional data center capacity online next year, which will meet
+our capacity needs.
+On your second question around the EU, we're working with regulators to
+address their concerns, so we can develop and improve our AI products based
+on the information that people choose to share on our platforms. I would say,
+6
+
+generally, I would expect training capacity to be a big driver of future CapEx
+needs. I think that will be the case, regardless of how things progress in
+Europe.
+Operator:
+
+Your next question comes from the line of Shweta Khajuria with Wolfe
+Research. Please go ahead.
+
+Shweta Khajuria: Thank you for taking my question. I guess I just wanted to ask about how -- if it
+is fair to think of the return, and you've been asked this question many different
+ways, but if we think about the incremental revenue that's generated, expected
+to generate, call it next year or this year versus prior years, and the
+incrementality that we see attributed to AI, is that a good way of thinking
+about the contribution of AI, or the return from your AI investments? Thank
+you.
+Susan Li:
+
+Thanks, Shweta. I'm going to do my best to answer this question and let me
+know if I didn't address the heart of it.
+So, the incremental revenue that you see this year and largely next year,
+coming from the ads business, that will primarily be a function of the
+investments that we have been making in the core AI work that goes into the
+ongoing ads performance improvements as we make our ranking, delivery,
+targeting, et cetera systems, more performant over time.
+We are certainly investing in core AI as a part of the infrastructure growth next
+year. At the same time, a lot of the CapEx that we are building next year is in
+service of training foundation models for our GenAI efforts, where we are really
+much earlier, and we don't expect that to be a meaningful driver of revenue in
+'24 or '25.
+But we expect that they will open up revenue opportunities in the future and
+we've talked about some of those -- making the core ads business better by
+making ads increasingly personalized at scale, growing business messaging,
+particularly in developed markets, obviously monetizing the consumer
+experience that we hope to build with Meta AI, and then also making it easier to
+create content for core organic engagement. But again, those I think will all
+play out over a longer period of time.
+
+Shweta Khajuria: Okay, thank you very much.
+Operator:
+
+Your next question comes from the line of Stephen Ju with UBS. Please go
+ahead.
+
+7
+
+Stephen Ju:
+
+Hi Susan. So, I was pleasantly surprised to hear you talk about games and
+entertainment sectors as being one of the larger contributors to your growth
+here, and I think this is a sector that's seen some tough times post-pandemic
+and even post-IDFA deprecation. So, what's changed from a product
+perspective that you've been able to revitalize spending from that segment?
+And digging in a little bit in terms of your commentary from the APAC-based
+advertisers and what they're doing. I think a couple of quarters ago, you gave
+us all a sort of food for thought to really think beyond a larger e-commerce
+platform. So, can you update us on the makeup of these advertisers and
+whether the audience they are targeting has evolved over time? Thanks.
+
+Chad Heaton:
+
+This is Chad. I can start with your first question. I'll start broadly about
+verticals. We saw a continued healthy year-over-year growth across verticals
+in Q2. We mentioned that came from online commerce, gaming, and
+entertainment and media. But the rate of growth did come down relative to Q1
+across pretty much all the verticals.
+In terms of gaming specifically, as I said, year-over-year growth remains strong
+but decelerated in Q2. That was primarily driven by slower growth among
+China-based advertisers. We don't have anything more specific in terms of
+products or features that launched. Again, more recently, it has been a vertical
+that we've seen strength in. And we saw strength again in Q2.
+
+Susan Li:
+
+On your second question, Stephen, we shared previously that two-thirds of our
+China ad revenue came from advertisers outside the top 10 spenders in China
+in 2023. I think that's the comment that you're referring to.
+We don't have an update on that for this year, but I would say it continues to be
+a diverse advertiser base. And more broadly, I think we are continuing to see a
+longer-term trend of growth from China-based advertisers.
+Again, there's obviously variability in growth rates period to period. There was
+clearly an impact, from COVID, but I think it's been over the last several years a
+strong contributor to growth for us and we expect it to remain so. And again,
+most of our China-based ad revenue continues to come from a longer tail of
+advertisers.
+
+Operator:
+
+Your next question comes from the line of Mark Zgutowicz with The
+Benchmark Company. Please go ahead.
+
+Mark Zgutowicz:
+
+Thank you. Susan, two quick ones if I could. On the CapEx side of things, I'm
+just curious if you would contemplate managing free cash flow in the negative
+8
+
+growth territory next year to fulfill another big step up you've discussed in
+terms of investment?
+And then just a clarification on Reels inventory growth. You mentioned a
+higher conversion of Reels ad units which would suggest lower growth in ad
+load here just going forward. But if you could just maybe balance that with a
+comment on just short video in general offering more inventory units to sell, I
+guess what’s the messaging here in terms of next 12 months, if you will, growth
+in ad units here with Reels versus the last 12 months? Just trying to get, I
+guess, a picture there. Thanks.
+Susan Li:
+
+Thanks, Mark. I’ll take that first question. We haven’t really guided on free
+cash flow. Again, I would say there is a big range of CapEx outcomes that we’re
+working through right now based on different data center options in different
+places. So, I think there’s a lot going on. It’s really a very dynamic planning area
+for us right now and we’ll have more clarity on that at the Q4 call.
+
+Chad Heaton:
+
+So, in terms of Reels inventory growth, I guess speaking broadly, we are in a
+period where say last year, we ramped Reels ad load pretty significantly. And
+so, we certainly don’t have opportunities in front of us to continue to increase
+ad load at that rate.
+I would say at this point, with respect to Reels, we’re focusing on optimizing
+the level of ads just by launching and testing new experiences for ads to deliver
+in Reels. One example of that would be back-to-back ads in Reels where in Q2
+we started showing some ads more closely together in Instagram Reels,
+including back-to-back when we have more relevant and engaging ads to show.
+We’re also, over on the Facebook side, we’re focused on video unification,
+where Facebook has a lot longer form video that monetizes at a lower rate than
+short form. And so, we expect that mix of video shift more to short form over
+time as part of that video unification works, which should benefit monetization
+efficiency of a video on Facebook.
+So, we have a lower ad load still on Reels than we do, say, in Feed and Stories.
+There are opportunities there as we look forward. But I wouldn’t expect them
+to be growing at the rate that they have historically.
+
+Operator:
+
+Your next question comes from the line Richard Greenfield with Lightshed.
+Please go ahead.
+
+Richard Greenfield:
+Hi, thanks for taking the question. You haven’t updated us on number of
+advertisers in a long time. I don’t know if you’re comfortable. I think the last
+9
+
+time it was like 12 million. But regardless of what the actual number is, I
+wanted to just hone in on Mark’s commentary around the impact of AI to help
+advertisers make content.
+Obviously, video ads with AI isn’t ready yet. But I’m sure over the next 12 or 18
+months it will be. Is there any way you can give us a sense of how many of -what percentage even, of Meta’s advertisers today actually make video ads
+versus just static images or text? Just trying to understand how much it could
+change the amount of advertisers and suppliers into your advertising funnel
+over the course of the next couple of years. Or anyway of thinking about that
+question or topic. Thanks.
+Susan Li:
+
+Thanks, Rich. We have not updated this, as you mentioned, and I don’t think
+we’re sharing the number of advertisers who create video ads. Having said
+that, I would emphasize Mark’s comments that we are really evolving our ads
+products and features to make it easier for advertisers to use a lot of the new
+GenAI-powered features that we’re building.
+We’ve been very pleased with the reception of our GenAI ad creative tools so
+far, we’ve seen good usage retention, performance games, even at the stage
+we are today, which is very early, over a million advertisers actually used either
+image expansion, background generation, or text variation in the past month,
+and we’re seeing particularly strong adoption of our image expansion feature,
+especially among smaller online commerce advertisers. And we’re seeing,
+again, improved performance gains from advertisers who are using these.
+So we are focused on continuing to expand the capabilities of our existing
+creative generation tools in the future. We want to introduce more interactive
+features to help advertisers fine-tune images that they generate through text
+prompts, for example. We want to make it easier to incorporate brand input
+and to allow advertisers to optimize the ad creatives based on what advertisers
+feel makes the ads unique to their brand, so working with them to better tailor
+their image and text generation capabilities to brand colors, logos, that sort of
+thing, and adding new formats.
+So we’re very early here, I think there is a lot of work that we’ll be undertaking
+over the next years, frankly, to make it easier for advertisers to continue
+generating personalized at scale.
+
+Kenneth Dorell:
+
+Krista, we have time for one last question.
+
+Operator:
+
+Certainly. Your last question comes from the line of Aaron Kessler with
+Seaport Research. Please go ahead.
+10
+
+Aaron Kessler:
+
+Great, appreciate the last question. I had just a couple questions on the maybe
+Family of Apps. think the growth slowed a little bit for the other category, just
+any updates on messaging revenues, et cetera? And just any more color on the
+legal costs, if you can quantify that at all, in terms of the Q2 G&A? Thank you.
+
+Chad Heaton:
+
+In terms of FoA growth, I think we’ve saw strong growth there. In terms of
+messaging specifically, click to messaging continues to be a strong area of
+growth for us. I would say business messaging -- paid messaging also
+continues to grow nicely for us. So I don’t know that we have new stats to
+share here but this continued to be a great area of growth for us in Q2.
+
+Kenneth Dorell:
+
+Aaron, this is Ken. The one thing I would also add is that within that segment
+we are lapping a pricing change with the business messaging product in June of
+last year, so we started lapping that later in the quarter, and then we’re also
+lapping more of the broader roll-out of Meta Verified, so that’s contributing to
+the results in Q2.
+
+Aaron Kessler:
+
+Got it, that’s helpful. And then just anything on the legal costs?
+
+Susan Li:
+
+Yes, on the legal side. Our Q2 G&A expenses include the settlement with the
+state of Texas, and so that has been fully accrued for. G&A expenses were
+down 12% year over year since we also lapped large legal-related expenses
+from the second quarter of 2023.
+
+Kenneth Dorell:
+
+Great. Well thank you, everyone, for joining us. We look forward to speaking to
+you again soon.
+
+Operator:
+
+This concludes today’s conference call. Thank you for your participation and
+you may now disconnect.
+
+11
+
+

@@ -21,7 +21,6 @@ from minikg.kg_searcher import KgCommunitiesSearcher
 from minikg.models import MiniKgConfig
 
 
-# TODO: YOU STILL HAVE MULTIPROCESSING ISSUES WITH CACHING
 DEBUG = bool(int(os.environ.get("DEBUG", 0)))
 if DEBUG:
     logging.warning("EXECUTING IN DEBUG MODE")
