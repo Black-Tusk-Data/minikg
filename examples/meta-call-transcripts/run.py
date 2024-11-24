@@ -43,14 +43,14 @@ config = MiniKgConfig(
 
 def main():
     api = Api(config=config)
-    # api.build_kg()
+    api.build_kg()
     # api.visualize_kg()
 
-    r = api.search_kg(
-        "How does Meta plan to profit from its open language models?",
-        k=3
-    )
-    print(json.dumps(r, indent=2))
+    # r = api.search_kg(
+    #     "How does Meta plan to profit from its open language models?",
+    #     k=3
+    # )
+    # print(json.dumps(r, indent=2))
     return
 
 
