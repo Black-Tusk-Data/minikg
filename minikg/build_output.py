@@ -119,6 +119,7 @@ class BuildStepOutput_Text(MiniKgBuildPlanStepOutput):
         data: dict
         with open(path, "r") as f:
             return BuildStepOutput_Text(text=f.read().strip())
+
     pass
 
 

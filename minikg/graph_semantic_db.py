@@ -89,7 +89,7 @@ class GraphSemanticDb:
         results = self.nodes.search(query_vec).metric("cosine").limit(k).to_list()
         return (
             [r["_distance"] for r in results],
-            [Node(**{attr: r[attr] for attr in Node.model_fields}) for r in results]
+            [Node(**{attr: r[attr] for attr in Node.model_fields}) for r in results],
         )
 
     def search_edges(

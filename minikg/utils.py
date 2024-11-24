@@ -66,10 +66,12 @@ def draw_graph(G, path: Path):
     for node in G.nodes:
         G_viz.add_node(
             node,
-            label="\n".join([
-                node,
-                G.nodes[node]["entity_type"],
-            ]),
+            label="\n".join(
+                [
+                    node,
+                    G.nodes[node]["entity_type"],
+                ]
+            ),
         )
         pass
     for edge in G.edges:

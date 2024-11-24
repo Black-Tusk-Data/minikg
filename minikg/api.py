@@ -194,8 +194,8 @@ class Api:
         os.system("mkdir ./community-viz")
 
         for community, community_name in zip(
-                package.communities,
-                package.community_db_names,
+            package.communities,
+            package.community_db_names,
         ):
             subgraph = package.G.subgraph(community)
 
@@ -203,10 +203,12 @@ class Api:
             for node in subgraph.nodes:
                 G_viz.add_node(
                     node,
-                    label="\n".join([
-                        node,
-                        package.G.nodes[node]["entity_type"],
-                    ]),
+                    label="\n".join(
+                        [
+                            node,
+                            package.G.nodes[node]["entity_type"],
+                        ]
+                    ),
                 )
                 pass
             for edge in subgraph.edges:

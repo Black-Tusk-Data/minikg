@@ -25,7 +25,9 @@ class GraphEdgeCompressor:
         self.G = G
         self.llm_client = OpenAIApiClient("gpt-4o")
         self.embedding_client = JinaAiClient("jina-embeddings-v3")
-        self.graph_cache = self.config.persist_dir / f"compress-cache-v{self.config.version}"
+        self.graph_cache = (
+            self.config.persist_dir / f"compress-cache-v{self.config.version}"
+        )
         return
 
     def _backup(self, G_new: GraphType) -> None:
@@ -122,10 +124,9 @@ class GraphEdgeCompressor:
                     **self.G.edges[u, v, idx],
                 )
                 continue
-            description_embeddings = self.embedding_client.embed([
-                self.G.edges[edge]["description"]
-                for edge in uv_edges
-            ])
+            description_embeddings = self.embedding_client.embed(
+                [self.G.edges[edge]["description"] for edge in uv_edges]
+            )
             similarities = cosine_similarity(description_embeddings)
             # partition into clusters, pick a leader
             clusters = utils.cluster_from_similarities(

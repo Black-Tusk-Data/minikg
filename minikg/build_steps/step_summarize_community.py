@@ -4,7 +4,11 @@ from expert_llm.remote.openai_shaped_client_implementations import OpenAIApiClie
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_merger import GraphMerger
 from minikg.models import MiniKgConfig
-from minikg.build_output import BuildStepOutput_Graph, BuildStepOutput_MultiGraph, BuildStepOutput_Text
+from minikg.build_output import (
+    BuildStepOutput_Graph,
+    BuildStepOutput_MultiGraph,
+    BuildStepOutput_Text,
+)
 
 
 # could be useful
@@ -33,10 +37,15 @@ class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_Text]):
 
     def _execute(self) -> BuildStepOutput_Text:
         nodes = self.graph.G.subgraph(self.community)
-        summary = self.llm_client.chat_completion([
-            ChatBlock(role="system", content=f"You are a {self.config.knowledge_domain} expert."),
-            # TODO: prompt
-        ]).content
+        summary = self.llm_client.chat_completion(
+            [
+                ChatBlock(
+                    role="system",
+                    content=f"You are a {self.config.knowledge_domain} expert.",
+                ),
+                # TODO: prompt
+            ]
+        ).content
         return BuildStepOutput_Text(text=summary)
 
     pass

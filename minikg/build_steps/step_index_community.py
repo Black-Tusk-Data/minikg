@@ -44,8 +44,7 @@ class Step_IndexCommunity(MiniKgBuilderStep[BuildStepOutput_IndexedCommunity]):
 
         # TODO: determine why some nodes have no description
         valid_nodes = [
-            node for node in subgraph.nodes
-            if subgraph.nodes[node].get("description")
+            node for node in subgraph.nodes if subgraph.nodes[node].get("description")
         ]
         if len(valid_nodes) < len(subgraph.nodes):
             logging.info(

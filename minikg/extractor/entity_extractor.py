@@ -25,10 +25,12 @@ class EntityExtractor(BaseExtractor[Entity]):
         return [
             "-GOAL-",
             f"Given a {self.config.document_desc} that is potentially relevant to this activity, identify all entities from within that text that capture the information and ideas it contains.",
-            " ".join([
-                "Only identify entities of the following types:",
-                *self.config.entity_types,
-            ]),
+            " ".join(
+                [
+                    "Only identify entities of the following types:",
+                    *self.config.entity_types,
+                ]
+            ),
             "-TEXT-",
             self._get_fragment_contents(),
         ]

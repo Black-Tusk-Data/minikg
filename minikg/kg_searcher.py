@@ -70,11 +70,10 @@ class KgCommunitiesSearcher:
             self.config.community_search_concurrency,
         )
         # we attempt to select only the most relevant communities
-        community_results = list(sorted(
-            community_results,
-            key=lambda x: x.nearest_member
-        ))
-        relevant_communities = community_results[:self.config.max_relevant_communities]
+        community_results = list(
+            sorted(community_results, key=lambda x: x.nearest_member)
+        )
+        relevant_communities = community_results[: self.config.max_relevant_communities]
         # TODO: could potentially also use the 'min similarity' to further restrict
         return {
             self.community_names[i]: result
@@ -87,7 +86,10 @@ class KgCommunitiesSearcher:
         plus a 'FINAL' -> final response
         """
         community_search_results = self.search(query, k=k)
-        logging.info("retrieved results from %d relevant communities", len(community_search_results))
+        logging.info(
+            "retrieved results from %d relevant communities",
+            len(community_search_results),
+        )
         responses = {}
         for community_name, search_result in community_search_results.items():
             if not search_result:
@@ -117,14 +119,16 @@ class KgCommunitiesSearcher:
                 chat_blocks=[
                     ChatBlock(
                         role="user",
-                        content="\n".join([
-                            (
-                                "Is the following text passage relevant to the query"
-                                f""" "{query}"?"""
-                            ),
-                            "TEXT PASSAGE:",
-                            community_answer.content
-                        ]),
+                        content="\n".join(
+                            [
+                                (
+                                    "Is the following text passage relevant to the query"
+                                    f""" "{query}"?"""
+                                ),
+                                "TEXT PASSAGE:",
+                                community_answer.content,
+                            ]
+                        ),
                     ),
                 ],
                 output_schema={
@@ -136,7 +140,7 @@ class KgCommunitiesSearcher:
                             "description": "Whether or not the text passage is relevant.",
                         },
                     },
-                }
+                },
             )
             if relevance_result["is_relevant"]:
                 responses[community_name] = community_answer.content

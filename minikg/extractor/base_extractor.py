@@ -6,7 +6,10 @@ import abc
 from typing import Generic, Type, TypeVar, cast
 
 from expert_llm.models import ChatBlock
-from expert_llm.remote.openai_shaped_client_implementations import OpenAIApiClient, TogetherAiClient
+from expert_llm.remote.openai_shaped_client_implementations import (
+    OpenAIApiClient,
+    TogetherAiClient,
+)
 from pydantic import Field, create_model, BaseModel
 
 from minikg.models import CompletionShape, FileFragment, MiniKgConfig
@@ -92,7 +95,7 @@ class BaseExtractor(Generic[T], abc.ABC):
                 },
             },
             output_schema_name="Extractions",
-            max_tokens=16000,   # pretty much the max
+            max_tokens=16000,  # pretty much the max
         )
         return [response_type.model_validate(row) for row in res["extractions"]]
 
