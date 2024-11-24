@@ -128,7 +128,7 @@ class KgCommunitiesSearcher:
                     content="\n".join(
                         [
                             (
-                                "Does the following statement rely COMPLETELY on information from the following text passage? "
+                                "Does the following statement include any information from outside the following text passage? "
                                 f""" "{statement}"?"""
                             ),
                             "TEXT PASSAGE:",
@@ -139,16 +139,16 @@ class KgCommunitiesSearcher:
             ],
             output_schema={
                 "type": "object",
-                "required": ["completely_reliant"],
+                "required": ["contains_external_information"],
                 "properties": {
-                    "completely_reliant": {
+                    "contains_external_information": {
                         "type": "boolean",
-                        "description": "Whether or not the statement is completely reliant on information from the text passage.",
+                        "description": "Whether or not the statement contains information from outside of the text passage.",
                     },
                 },
             },
         )
-        return grounded_result["completely_reliant"]
+        return not grounded_result["contains_external_information"]
 
     def answer(self, query: str, k: int) -> dict[str, str]:
         """
@@ -184,7 +184,7 @@ class KgCommunitiesSearcher:
                     ),
                 ]
             )
-            # ensure that the response is relevant
+
             if not self.check_answer_is_relevant(query=query, answer=community_answer.content):
                 logging.debug("community %s answer deemed irrelevant", community_name)
                 continue
@@ -196,7 +196,6 @@ class KgCommunitiesSearcher:
                 logging.debug("community %s answer deemed ungrounded", community_name)
                 continue
 
-            # otherwise, all good
             responses[community_name] = community_answer.content
             pass
 
