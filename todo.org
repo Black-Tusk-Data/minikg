@@ -1,4 +1,0 @@
- - [ ] add a cache layer for embeddings - it's redundant between compression and indexing
- - [ ] add more progress feedback in every step
- - [ ] estimate cost beforehand
- - [ ] try Together AI
