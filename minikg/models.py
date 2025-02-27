@@ -32,6 +32,7 @@ class MiniKgConfig(NamedTuple):
     chunk_overlap_lines: int
     community_threshold_similarity: float = 0.5
     community_search_concurrency: int = 20
+    community_algorithm: str = "louvain"
     document_desc: str = "document"
     index_graph: bool = True
     embedding_size: int = 1024

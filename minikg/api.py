@@ -10,7 +10,7 @@ from typing import Generic, TypeVar
 from minikg.build_output import BuildStepOutput_Package
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.build_steps.step_compress_kg_edges import Step_CompressRedundantEdges
-from minikg.build_steps.step_define_communities import Step_DefineCommunitiesLouvain
+from minikg.build_steps.step_define_communities import Step_DefineCommunitiesLeiden, Step_DefineCommunitiesLouvain
 from minikg.build_steps.step_extract_chunk_kg import Step_ExtractChunkKg
 from minikg.build_steps.step_index_community import Step_IndexCommunity
 from minikg.build_steps.step_merge_kgs import Step_MergeKgs
@@ -29,6 +29,12 @@ if DEBUG:
 
 
 T = TypeVar("T", bound=MiniKgBuilderStep)
+
+
+def get_define_community_step(config: MiniKgConfig) -> type[Step_DefineCommunitiesLouvain] | type[Step_DefineCommunitiesLeiden]:
+    if config.community_algorithm == "leiden":
+        return Step_DefineCommunitiesLeiden
+    return Step_DefineCommunitiesLouvain
 
 
 def execute_step(step: T) -> T:
@@ -137,7 +143,9 @@ class Api:
 
         assert compress_step.output
         logging.info("defining communities")
-        community_step = Step_DefineCommunitiesLouvain(
+        define_communities_step = get_define_community_step(self.config)
+        logging.info("using community defining class %s", define_communities_step.__name__)
+        community_step = define_communities_step(
             self.config,
             graph=compress_step.output,
         )
