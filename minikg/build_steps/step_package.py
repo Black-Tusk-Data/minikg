@@ -10,7 +10,6 @@ from minikg.build_output import (
     BuildStepOutput_IndexedCommunity,
     BuildStepOutput_MultiGraph,
     BuildStepOutput_Package,
-    BuildStepOutput_Vacuous,
 )
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_semantic_db import GraphSemanticDb
@@ -25,11 +24,14 @@ class Step_Package(MiniKgBuilderStep[BuildStepOutput_Package]):
         master_graph: BuildStepOutput_MultiGraph,
         communities: BuildStepOutput_Communities,
         community_indexes: list[BuildStepOutput_IndexedCommunity],
+        # TODO: iss-1
+        community_names: list[str],
     ):
         super().__init__(config)
         self.communities = communities
         self.master_graph = master_graph
         self.community_indexes = community_indexes
+        self.community_names = community_names
         return
 
     @staticmethod
@@ -45,6 +47,7 @@ class Step_Package(MiniKgBuilderStep[BuildStepOutput_Package]):
             G=self.master_graph.G,
             communities=self.communities.communities,
             community_db_names=[idx.semantic_db_name for idx in self.community_indexes],
+            community_names=self.community_names,
         )
 
     pass

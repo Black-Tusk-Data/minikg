@@ -81,10 +81,10 @@ class KgCommunitiesSearcher:
         }
 
     def check_answer_is_relevant(
-            self,
-            *,
-            query: str,
-            answer: str,
+        self,
+        *,
+        query: str,
+        answer: str,
     ) -> bool:
         relevance_result = self.llm_client.structured_completion_raw(
             chat_blocks=[
@@ -116,10 +116,10 @@ class KgCommunitiesSearcher:
         return relevance_result["is_useful"]
 
     def check_statement_is_grounded(
-            self,
-            *,
-            statement: str,
-            context: str,
+        self,
+        *,
+        statement: str,
+        context: str,
     ) -> bool:
         grounded_result = self.llm_client.structured_completion_raw(
             chat_blocks=[
@@ -185,13 +185,15 @@ class KgCommunitiesSearcher:
                 ]
             )
 
-            if not self.check_answer_is_relevant(query=query, answer=community_answer.content):
+            if not self.check_answer_is_relevant(
+                query=query, answer=community_answer.content
+            ):
                 logging.debug("community %s answer deemed irrelevant", community_name)
                 continue
 
             if not self.check_statement_is_grounded(
-                    statement=community_answer.content,
-                    context=context,
+                statement=community_answer.content,
+                context=context,
             ):
                 logging.debug("community %s answer deemed ungrounded", community_name)
                 continue

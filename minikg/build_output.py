@@ -123,6 +123,7 @@ class BuildStepOutput_Text(MiniKgBuildPlanStepOutput):
     pass
 
 
+# would like to wrap in an obj and add a 'name' to each community
 class BuildStepOutput_Communities(MiniKgBuildPlanStepOutput):
     def __init__(self, communities: list[list[str]]):
         self.communities = communities
@@ -192,10 +193,12 @@ class BuildStepOutput_Package(MiniKgBuildPlanStepOutput):
         G: nx.MultiGraph,  # or just 'Graph'
         communities: list[list[str]],
         community_db_names: list[str],
+        community_names: list[str],
     ):
         self.G = G
         self.communities = communities
         self.community_db_names = community_db_names
+        self.community_names = community_names
         return
 
     def to_file(self, path: Path) -> None:
@@ -204,6 +207,7 @@ class BuildStepOutput_Package(MiniKgBuildPlanStepOutput):
             "graph_b64": base64.b64encode(graph_bytes).decode("utf-8"),
             "communities": self.communities,
             "community_db_names": self.community_db_names,
+            "community_names": self.community_names,
         }
         with open(path, "w") as f:
             json.dump(dat, f)
@@ -220,11 +224,8 @@ class BuildStepOutput_Package(MiniKgBuildPlanStepOutput):
                 G=graph,
                 communities=dat["communities"],
                 community_db_names=dat["community_db_names"],
+                community_names=dat["community_names"],
             )
         pass
-
-    # or, a 'from package' method on the searcher
-    def get_knowledge_base_searcher(self):
-        return
 
     pass

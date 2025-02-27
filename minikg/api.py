@@ -90,16 +90,13 @@ class Api:
         )
 
     def _gather_input_files(self) -> list[Path]:
-        ignore_expressions = [
-            re.compile(rf"{self.config.input_dir}/\.git/?")
-        ]
+        ignore_expressions = [re.compile(rf"{self.config.input_dir}/\.git/?")]
         return [
             path
             for path in self.config.input_dir.rglob(self.config.input_file_exp)
             if not any(expr.search(str(path)) for expr in ignore_expressions)
             and path.is_file()
         ]
-
 
     def build_kg(self) -> None:
         source_paths = self._gather_input_files()
@@ -169,8 +166,12 @@ class Api:
                     self.config,
                     master_graph=compress_step.output,
                     communities=community_step.output,
-                    # this should not be complaining
                     community_indexes=[step.output for step in index_community_steps],
+                    # TODO: iss-1
+                    community_names=[
+                        f"community-{i}"
+                        for i in range(len(community_step.output.communities))
+                    ],
                 )
             ]
         )[0]
@@ -197,12 +198,13 @@ class Api:
         import pygraphviz as pgv
 
         package = self._load_package()
-        os.system("rm -rf ./community-viz")
-        os.system("mkdir ./community-viz")
+        outdir = Path("community-viz")
+        os.system(f"rm -rf {outdir}")
+        os.system(f"mkdir {outdir}")
 
         for community, community_name in zip(
             package.communities,
-            package.community_db_names,
+            package.community_names,
         ):
             subgraph = package.G.subgraph(community)
 
@@ -225,7 +227,7 @@ class Api:
                 )
                 pass
 
-            G_viz.draw(f"./{community_name}.png", prog="dot")
+            G_viz.draw(str(outdir / f"./{community_name}.png"), prog="dot")
             pass
 
         return

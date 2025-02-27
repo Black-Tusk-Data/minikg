@@ -1,0 +1,8 @@
+ - iss-1
+   - need to add 'name' to each community
+   - so instead of just being a list of node names, we should use a real
+     object for each community
+   - names don't need to be meaningful, that isn't a requirement
+     for this lib at least right now
+ - iss-2
+   - want to support hierarchical leiden - need to compress the multi-graph
