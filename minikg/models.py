@@ -30,11 +30,12 @@ class MiniKgConfig(NamedTuple):
     input_file_exp: str
     max_chunk_lines: int
     chunk_overlap_lines: int
-    embedding_size: int = 1024
-    document_desc: str = "document"
-    embedding_model: str = "jina-embeddings-v3"
     community_threshold_similarity: float = 0.5
     community_search_concurrency: int = 20
+    document_desc: str = "document"
+    index_graph: bool = True
+    embedding_size: int = 1024
+    embedding_model: str = "jina-embeddings-v3"
     max_relevant_communities: int = 10
     pass
 

@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 import logging
 import os
 from pathlib import Path
+import re
 from typing import Generic, TypeVar
 
 from minikg.build_output import BuildStepOutput_Package
@@ -89,13 +90,16 @@ class Api:
         )
 
     def _gather_input_files(self) -> list[Path]:
-        return list(self.config.input_dir.rglob(self.config.input_file_exp))
-        # return [
-        #     path.relative_to(self.config.input_dir)
-        #     for path in self.config.input_dir.rglob(
-        #             self.config.input_file_exp
-        #     )
-        # ]
+        ignore_expressions = [
+            re.compile(rf"{self.config.input_dir}/\.git/?")
+        ]
+        return [
+            path
+            for path in self.config.input_dir.rglob(self.config.input_file_exp)
+            if not any(expr.search(str(path)) for expr in ignore_expressions)
+            and path.is_file()
+        ]
+
 
     def build_kg(self) -> None:
         source_paths = self._gather_input_files()
@@ -143,16 +147,19 @@ class Api:
         community_step = self.executor.execute_all([community_step])[0]
 
         assert community_step.output
-        index_community_steps = [
-            Step_IndexCommunity(
-                self.config,
-                master_graph=compress_step.output,
-                community=community,
-                community_name=f"community-{i}",
-            )
-            for i, community in enumerate(community_step.output.communities)
-        ]
-        index_community_steps = self.executor.execute_all(index_community_steps)
+        index_community_steps: list[Step_IndexCommunity] = []
+        if self.config.index_graph:
+            index_community_steps = [
+                Step_IndexCommunity(
+                    self.config,
+                    master_graph=compress_step.output,
+                    community=community,
+                    community_name=f"community-{i}",
+                )
+                for i, community in enumerate(community_step.output.communities)
+            ]
+            index_community_steps = self.executor.execute_all(index_community_steps)
+            pass
 
         # wrap this all up in a way that's easy to load from disk
         assert all([step.output for step in index_community_steps])
@@ -162,6 +169,7 @@ class Api:
                     self.config,
                     master_graph=compress_step.output,
                     communities=community_step.output,
+                    # this should not be complaining
                     community_indexes=[step.output for step in index_community_steps],
                 )
             ]
