@@ -4,12 +4,13 @@ from typing import Type
 import networkx as nx
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
-from minikg.models import MiniKgConfig
+from minikg.models import Community, MiniKgConfig
 from minikg.build_output import (
     BuildStepOutput_Graph,
     BuildStepOutput_MultiGraph,
     BuildStepOutput_Communities,
 )
+from minikg.utils import flatten_multigraph
 
 
 class Step_DefineCommunitiesLouvain(MiniKgBuilderStep[BuildStepOutput_Communities]):
@@ -32,14 +33,19 @@ class Step_DefineCommunitiesLouvain(MiniKgBuilderStep[BuildStepOutput_Communitie
 
     def _execute(self) -> BuildStepOutput_Communities:
         communities: list[set[str]] = nx.community.louvain_communities(self.graph.G)
-        return BuildStepOutput_Communities(
-            [list(community) for community in communities]
-        )
+        # louvain has no nesting, these are just lists of node IDs
+        return BuildStepOutput_Communities([
+            Community(
+                id=str(i),
+                name=str(i),
+                child_node_ids=list(node_ids),
+            )
+            for i, node_ids in enumerate(communities)
+        ])
 
     pass
 
 
-# TODO: Leiden algorithm
 class Step_DefineCommunitiesLeiden(MiniKgBuilderStep[BuildStepOutput_Communities]):
     def __init__(
         self,
@@ -61,14 +67,7 @@ class Step_DefineCommunitiesLeiden(MiniKgBuilderStep[BuildStepOutput_Communities
     def _execute(self) -> BuildStepOutput_Communities:
         from graspologic.partition import hierarchical_leiden, HierarchicalCluster
 
-        flat_G = nx.Graph()
-        flat_G.add_nodes_from(self.graph.G.nodes)
-
-        # TODO: iss-5
-        for u, v, _weight in self.graph.G.edges:
-            flat_G.add_edge(u, v)
-            pass
-
+        flat_G = flatten_multigraph(self.graph.G)
 
         communities: list[HierarchicalCluster] = hierarchical_leiden(
             flat_G.to_undirected(),
@@ -78,31 +77,54 @@ class Step_DefineCommunitiesLeiden(MiniKgBuilderStep[BuildStepOutput_Communities
             resolution=1,  # larger -> smaller communities
         )
 
-        clusters: dict[str, list[str]] = {}
+        communities_by_id: dict[str, Community] = {}
+        # clusters: dict[str, list[str]] = {}
         for com in communities:
-            cluster_id = str(com.cluster)
+            # TODO: this is just an int
+            community_id = str(com.cluster)
             if com.is_final_cluster:
-                if cluster_id not in clusters:
-                    clusters[cluster_id] = []
+                # a node
+                # - is the community ID unique?  Does it correspond to the 'node'?
+                if community_id not in communities_by_id:
+                    communities_by_id[community_id] = Community(
+                        id=community_id,
+                        name=community_id,
+                    )
                     pass
-                clusters[cluster_id].append(com.node)
+                communities_by_id[community_id].child_node_ids.append(com.node)
                 pass
-            if cluster_id in clusters:
-                # already computed
+            # o/w, a true community
+            if community_id in communities_by_id:
+                # we've already computed the children of this community
                 continue
-            child_cluster_ids = set(
-                [
-                    str(com2.cluster)
-                    for com2 in communities
-                    if com2.parent_cluster == com.cluster
-                ]
+
+            child_clusters = [
+                com2
+                for com2 in communities
+                if com2.parent_cluster == com.cluster
+            ]
+
+            communities_by_id[community_id] = Community(
+                id=community_id,
+                name=community_id,
+                child_community_ids=list(set(
+                    cluster.cluster
+                    for cluster in child_clusters
+                    if not cluster.is_final_cluster
+                )),
+                child_node_ids=list(set(
+                    cluster.cluster
+                    for cluster in child_clusters
+                    if cluster.is_final_cluster
+                )),
             )
-            clusters[cluster_id] = list(child_cluster_ids)
             pass
+
+        # TODO: please check the above
 
         return BuildStepOutput_Communities(
             # TODO: iss-4 - this is fairly broken without
-            list(clusters.values())
+            list(communities_by_id.values())
         )
 
     pass

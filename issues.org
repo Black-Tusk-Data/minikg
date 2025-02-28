@@ -16,3 +16,9 @@
  - [ ] iss-5
    - in Leiden, when flattened graph, sum the number of multi-edges to
      give a weight for each flattened edge
+
+* next steps
+ - once you have communities with structure,
+   add a 'summary' step that operates with max possible parallelism
+   (likely using queue)
+   to summarize each community

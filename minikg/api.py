@@ -96,6 +96,7 @@ class Api:
         )
 
     def _gather_input_files(self) -> list[Path]:
+        # this can be its own step, where we check with the LLM if it's a code file or not
         ignore_expressions = [re.compile(rf"{self.config.input_dir}/\.git/?")]
         return [
             path

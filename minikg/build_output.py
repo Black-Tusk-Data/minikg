@@ -10,7 +10,7 @@ import networkx as nx
 from pydantic import BaseModel, Field
 
 from minikg.graph_semantic_db import GraphSemanticDb
-from minikg.models import FileFragment, GraphType
+from minikg.models import FileFragment, GraphType, Community
 from minikg.utils import scrub_title_key
 
 
@@ -125,21 +125,27 @@ class BuildStepOutput_Text(MiniKgBuildPlanStepOutput):
 
 # would like to wrap in an obj and add a 'name' to each community
 class BuildStepOutput_Communities(MiniKgBuildPlanStepOutput):
-    def __init__(self, communities: list[list[str]]):
+    def __init__(self, communities: list[Community]):
         self.communities = communities
         return
 
     def to_file(self, path: Path) -> None:
         with open(path, "w") as f:
-            f.write(json.dumps(self.communities))
+            f.write(json.dumps([
+                com.model_dump()
+                for com in self.communities
+            ]))
             pass
         return
 
     @classmethod
     def from_file(cls, path: Path) -> "BuildStepOutput_Communities":
-        communities: list[list[str]]
+        communities: list[Community]
         with open(path, "r") as f:
-            communities = json.load(f)
+            communities = [
+                Community.model_validate(r)
+                for r in json.load(f)
+            ]
             pass
         return cls(
             communities,
