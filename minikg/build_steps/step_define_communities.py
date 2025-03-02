@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import Type
 
@@ -67,7 +68,9 @@ class Step_DefineCommunitiesLeiden(MiniKgBuilderStep[BuildStepOutput_Communities
     def _execute(self) -> BuildStepOutput_Communities:
         from graspologic.partition import hierarchical_leiden, HierarchicalCluster
 
+        logging.info("normal G: %s", self.graph.G.nodes)
         flat_G = flatten_multigraph(self.graph.G)
+        logging.info("flat G: %s", flat_G.nodes)
 
         communities: list[HierarchicalCluster] = hierarchical_leiden(
             flat_G.to_undirected(),

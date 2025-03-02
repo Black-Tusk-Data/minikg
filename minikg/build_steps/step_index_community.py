@@ -10,7 +10,7 @@ from minikg.build_output import (
 )
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_semantic_db import GraphSemanticDb
-from minikg.models import Edge, MiniKgConfig, Node
+from minikg.models import Community, Edge, MiniKgConfig, Node
 
 
 class Step_IndexCommunity(MiniKgBuilderStep[BuildStepOutput_IndexedCommunity]):
@@ -21,26 +21,24 @@ class Step_IndexCommunity(MiniKgBuilderStep[BuildStepOutput_IndexedCommunity]):
         config: MiniKgConfig,
         *,
         master_graph: BuildStepOutput_MultiGraph,
-        community: list[str],
-        community_name: str,
+        community: Community,
     ):
         super().__init__(config)
-        self.community_name = community_name
         self.master_graph = master_graph
         self.community = community
         return
 
     def get_id(self) -> str:
-        return self.community_name
+        return self.community.name
 
     @staticmethod
     def get_output_type() -> Type[BuildStepOutput_IndexedCommunity]:
         return BuildStepOutput_IndexedCommunity
 
     def _execute(self) -> BuildStepOutput_IndexedCommunity:
-        semantic_db = GraphSemanticDb(self.config, name=self.community_name)
+        semantic_db = GraphSemanticDb(self.config, name=self.community.name)
 
-        subgraph = nx.subgraph(self.master_graph.G, self.community)
+        subgraph = nx.subgraph(self.master_graph.G, self.community.child_node_ids)
 
         # TODO: determine why some nodes have no description
         valid_nodes = [

@@ -1,4 +1,6 @@
 from pathlib import Path
+
+import networkx as nx
 import numpy as np
 
 
@@ -94,4 +96,4 @@ def flatten_multigraph(G: nx.MultiGraph) -> nx.Graph:
        flat_G.add_edge(u, v)
        pass
 
-    return flat_G
+   return flat_G

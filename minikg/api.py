@@ -176,16 +176,9 @@ class Api:
                     master_graph=compress_step.output,
                     communities=community_step.output,
                     community_indexes=[step.output for step in index_community_steps],
-                    # TODO: iss-1
-                    community_names=[
-                        f"community-{i}"
-                        for i in range(len(community_step.output.communities))
-                    ],
                 )
             ]
         )[0]
-
-        print("DONE FOR NOW!")
         return
 
     def search_kg(self, query: str, k: int):

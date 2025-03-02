@@ -197,23 +197,20 @@ class BuildStepOutput_Package(MiniKgBuildPlanStepOutput):
         self,
         *,
         G: nx.MultiGraph,  # or just 'Graph'
-        communities: list[list[str]],
+        communities: list[Community],
         community_db_names: list[str],
-        community_names: list[str],
     ):
         self.G = G
         self.communities = communities
         self.community_db_names = community_db_names
-        self.community_names = community_names
         return
 
     def to_file(self, path: Path) -> None:
         graph_bytes = pickle.dumps(self.G)
         dat = {
             "graph_b64": base64.b64encode(graph_bytes).decode("utf-8"),
-            "communities": self.communities,
+            "communities": [com.model_dump() for com in self.communities],
             "community_db_names": self.community_db_names,
-            "community_names": self.community_names,
         }
         with open(path, "w") as f:
             json.dump(dat, f)
@@ -228,9 +225,8 @@ class BuildStepOutput_Package(MiniKgBuildPlanStepOutput):
             graph = pickle.loads(graph_bytes)
             return cls(
                 G=graph,
-                communities=dat["communities"],
+                communities=[Community.model_validate(r) for r in dat["communities"]],
                 community_db_names=dat["community_db_names"],
-                community_names=dat["community_names"],
             )
         pass
 
