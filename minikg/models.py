@@ -107,7 +107,6 @@ class Community(BaseModel):
     child_node_ids: list[str] = Field(default_factory=list)
     child_community_ids: list[str] = Field(default_factory=list)
     id: str
-    name: str                   # needed?
     pass
 
 

@@ -38,7 +38,6 @@ class Step_DefineCommunitiesLouvain(MiniKgBuilderStep[BuildStepOutput_Communitie
         return BuildStepOutput_Communities([
             Community(
                 id=str(i),
-                name=str(i),
                 child_node_ids=list(node_ids),
             )
             for i, node_ids in enumerate(communities)
@@ -89,7 +88,6 @@ class Step_DefineCommunitiesLeiden(MiniKgBuilderStep[BuildStepOutput_Communities
                 if community_id not in communities_by_id:
                     communities_by_id[community_id] = Community(
                         id=community_id,
-                        name=community_id,
                     )
                     pass
                 # - 'community.node' is the node ID
@@ -108,7 +106,6 @@ class Step_DefineCommunitiesLeiden(MiniKgBuilderStep[BuildStepOutput_Communities
 
             communities_by_id[community_id] = Community(
                 id=community_id,
-                name=community_id,
                 child_community_ids=list(set(
                     cluster.cluster
                     for cluster in child_clusters

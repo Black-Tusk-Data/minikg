@@ -8,7 +8,8 @@
    - want to support hierarchical leiden - need to compress the multi-graph
  - [ ] iss-3
    - need to support passing-in configuration for leiden
- - [ ] iss-4
+ - [X] iss-4
+   [[/Users/liam/btd/minikg/minikg/models.py::106]] class Community(BaseModel):
    - better structure for community defs
    - it's impossible to tell if a community node is an actual node
      or another community
