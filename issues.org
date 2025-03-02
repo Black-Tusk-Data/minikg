@@ -1,10 +1,10 @@
- - [ ] iss-1
+ - [X] iss-1
    - need to add 'name' to each community
    - so instead of just being a list of node names, we should use a real
      object for each community
    - names don't need to be meaningful, that isn't a requirement
      for this lib at least right now
- - [ ] iss-2
+ - [X] iss-2
    - want to support hierarchical leiden - need to compress the multi-graph
  - [ ] iss-3
    - need to support passing-in configuration for leiden
@@ -16,6 +16,9 @@
  - [ ] iss-5
    - in Leiden, when flattened graph, sum the number of multi-edges to
      give a weight for each flattened edge
+ - [ ] iss-6
+   - ensure that the algorithm operates on disjoint components of the graph,
+     may need to iterate over the connected components in the community detection phase
 
 * next steps
  - once you have communities with structure,

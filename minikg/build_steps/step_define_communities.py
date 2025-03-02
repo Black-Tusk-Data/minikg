@@ -72,7 +72,7 @@ class Step_DefineCommunitiesLeiden(MiniKgBuilderStep[BuildStepOutput_Communities
         flat_G = flatten_multigraph(self.graph.G)
         logging.info("flat G: %s", flat_G.nodes)
 
-        communities: list[HierarchicalCluster] = hierarchical_leiden(
+        hierarchy_rows: list[HierarchicalCluster] = hierarchical_leiden(
             flat_G.to_undirected(),
             # TODO: iss-3
             max_cluster_size=10,
@@ -81,20 +81,19 @@ class Step_DefineCommunitiesLeiden(MiniKgBuilderStep[BuildStepOutput_Communities
         )
 
         communities_by_id: dict[str, Community] = {}
-        # clusters: dict[str, list[str]] = {}
-        for com in communities:
-            # TODO: this is just an int
-            community_id = str(com.cluster)
-            if com.is_final_cluster:
+        for row in hierarchy_rows:
+            # all
+            community_id = str(row.cluster)
+            if row.is_final_cluster:
                 # a node
-                # - is the community ID unique?  Does it correspond to the 'node'?
                 if community_id not in communities_by_id:
                     communities_by_id[community_id] = Community(
                         id=community_id,
                         name=community_id,
                     )
                     pass
-                communities_by_id[community_id].child_node_ids.append(com.node)
+                # - 'community.node' is the node ID
+                communities_by_id[community_id].child_node_ids.append(row.node)
                 pass
             # o/w, a true community
             if community_id in communities_by_id:
@@ -102,9 +101,9 @@ class Step_DefineCommunitiesLeiden(MiniKgBuilderStep[BuildStepOutput_Communities
                 continue
 
             child_clusters = [
-                com2
-                for com2 in communities
-                if com2.parent_cluster == com.cluster
+                row2
+                for row2 in hierarchy_rows
+                if row2.parent_cluster == row.cluster
             ]
 
             communities_by_id[community_id] = Community(
@@ -123,10 +122,9 @@ class Step_DefineCommunitiesLeiden(MiniKgBuilderStep[BuildStepOutput_Communities
             )
             pass
 
-        # TODO: please check the above
+        # TODO: please check the above on a more complex graph
 
         return BuildStepOutput_Communities(
-            # TODO: iss-4 - this is fairly broken without
             list(communities_by_id.values())
         )
 
