@@ -160,7 +160,6 @@ class Api:
                     self.config,
                     master_graph=compress_step.output,
                     community=community,
-                    community_name=f"community-{i}",
                 )
                 for i, community in enumerate(community_step.output.communities)
             ]

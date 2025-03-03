@@ -29,14 +29,15 @@ class Step_IndexCommunity(MiniKgBuilderStep[BuildStepOutput_IndexedCommunity]):
         return
 
     def get_id(self) -> str:
-        return self.community.name
+        return f"community-index:{self.community.id}"
 
     @staticmethod
     def get_output_type() -> Type[BuildStepOutput_IndexedCommunity]:
         return BuildStepOutput_IndexedCommunity
 
     def _execute(self) -> BuildStepOutput_IndexedCommunity:
-        semantic_db = GraphSemanticDb(self.config, name=self.community.name)
+        # revisit the name of this DB
+        semantic_db = GraphSemanticDb(self.config, name=self.community.id)
 
         subgraph = nx.subgraph(self.master_graph.G, self.community.child_node_ids)
 

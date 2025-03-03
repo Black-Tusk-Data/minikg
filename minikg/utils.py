@@ -97,3 +97,25 @@ def flatten_multigraph(G: nx.MultiGraph) -> nx.Graph:
        pass
 
    return flat_G
+
+
+# TODO TEST
+def get_prompt_context_for_graph(G: nx.Graph) -> str:
+    node_sections: list[str] = []
+    for node_id in G.nodes:
+        node_data = G.nodes[node_id]
+        lines = [
+            " ".join([node_data["entity_type"], node_id]),
+            node_data.description,
+        ]
+        for v in G.neighbors(node):
+            edge_datas = G.get_edge_data(node_id, v)
+            for edge_data in edge_datas.values():
+                edge_description = edge_data["description"]
+                lines.append(f" - {edge_description}")
+                pass
+            pass
+        lines.append("")
+        pass
+
+    return "\n".join(node_sections)

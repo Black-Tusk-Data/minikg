@@ -20,6 +20,9 @@
  - [ ] iss-6
    - ensure that the algorithm operates on disjoint components of the graph,
      may need to iterate over the connected components in the community detection phase
+ - [ ] iss-7
+   - figure out why edge 'description' s are disappearing
+   - pretty sure just need to use 'G.get_edge_data'
 
 * next steps
  - once you have communities with structure,

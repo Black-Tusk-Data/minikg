@@ -3,49 +3,63 @@ from expert_llm.remote.openai_shaped_client_implementations import OpenAIApiClie
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_merger import GraphMerger
-from minikg.models import MiniKgConfig
+from minikg.models import Community, MiniKgConfig
 from minikg.build_output import (
+    BuildStepOutput_Dict,
     BuildStepOutput_Graph,
-    BuildStepOutput_MultiGraph,
-    BuildStepOutput_Text,
 )
+from minikg.utils import build_prompt_context_from_graph
 
 
-# could be useful
-class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_Text]):
+class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_Dict]):
     def __init__(
         self,
         config: MiniKgConfig,
         *,
+        attribute_prompts: dict[str, str],
+        community: Community,
         graph: BuildStepOutput_Graph,
-        community_name: str,
-        community: list[str],
     ) -> None:
         super().__init__(config)
-        self.graph = graph
+        self.attribute_prompts = attribute_prompts
         self.community = community
-        self.community_name = community_name
+        self.graph = graph
         self.llm_client = OpenAIApiClient("gpt-4o")
         return
 
     def get_id(self) -> str:
-        return f"community-summary:{self.community_name}"
+        return f"community-summary:{self.community.id}"
 
     @staticmethod
     def get_output_type():
-        return BuildStepOutput_Text
+        return BuildStepOutput_Dict
 
-    def _execute(self) -> BuildStepOutput_Text:
-        nodes = self.graph.G.subgraph(self.community)
-        summary = self.llm_client.chat_completion(
-            [
-                ChatBlock(
-                    role="system",
-                    content=f"You are a {self.config.knowledge_domain} expert.",
-                ),
-                # TODO: prompt
-            ]
-        ).content
-        return BuildStepOutput_Text(text=summary)
+    def _execute(self) -> BuildStepOutput_Dict:
+        subgraph = self.graph.G.subgraph(self.community)
+        prompt_context = build_prompt_context_from_graph
+        # TODO iss-7: should have edge 'description' as well
+        summary_data: dict[str, str] = {}
+        for name, prompt in self.attribute_prompts.items():
+            result = self.llm_client.chat_completion(
+                [
+                    ChatBlock(
+                        role="system",
+                        content=" ".join ([
+                            f"You are a {self.config.knowledge_domain} expert.",
+                            "Your task is to extract information from a provided knowledge graph.",
+                            "Refer ONLY to information from the knowledge graph in your responses.",
+                            prompt,
+                        ])
+                    ),
+                    ChatBlock(
+                        role="user",
+                        content=prompt_context,
+                    )
+                ]
+            )
+            summary_data[name] = result.content
+            pass
+
+        return BuildStepOutput_Dict(data=summary_data)
 
     pass

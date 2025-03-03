@@ -123,6 +123,30 @@ class BuildStepOutput_Text(MiniKgBuildPlanStepOutput):
     pass
 
 
+class BuildStepOutput_Dict(MiniKgBuildPlanStepOutput):
+    def __init__(
+            self,
+            *,
+            data: dict
+    ):
+        self.data = data
+        return
+
+    def to_file(self, path: Path) -> None:
+        with open(path, "w") as f:
+            f.write(json.dumps(self.data))
+            pass
+        return
+
+    @classmethod
+    def from_file(cls, path: Path) -> "BuildStepOutput_Dict":
+        data: dict
+        with open(path, "r") as f:
+            return BuildStepOutput_Dict(data=json.load(f))
+
+    pass
+
+
 # would like to wrap in an obj and add a 'name' to each community
 class BuildStepOutput_Communities(MiniKgBuildPlanStepOutput):
     def __init__(self, communities: list[Community]):
