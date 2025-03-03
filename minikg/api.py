@@ -10,7 +10,7 @@ from typing import Generic, TypeVar
 from minikg.build_output import BuildStepOutput_CommunitySummary, BuildStepOutput_Package
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.build_steps.step_compress_kg_edges import Step_CompressRedundantEdges
-from minikg.build_steps.step_define_communities import Step_DefineCommunitiesLeiden, Step_DefineCommunitiesLouvain
+from minikg.build_steps.step_define_communities import Step_DefineCommunities
 from minikg.build_steps.step_extract_chunk_kg import Step_ExtractChunkKg
 from minikg.build_steps.step_index_community import Step_IndexCommunity
 from minikg.build_steps.step_merge_kgs import Step_MergeKgs
@@ -19,6 +19,7 @@ from minikg.build_steps.step_split_doc import Step_SplitDoc
 from minikg.build_steps.step_summarize_community import Step_SummarizeCommunity
 from minikg.graph_edge_compressor import GraphEdgeCompressor
 from minikg.graph_semantic_db import GraphSemanticDb
+from minikg.graphtools.community_detection import CommunityDetector, CommunityDetectorLeiden, CommunityDetectorLouvain
 from minikg.graphtools.community_summaries import get_community_summary_compute_order
 from minikg.kg_searcher import KgCommunitiesSearcher
 from minikg.models import Community, MiniKgConfig
@@ -33,10 +34,10 @@ if DEBUG:
 T = TypeVar("T", bound=MiniKgBuilderStep)
 
 
-def get_define_community_step(config: MiniKgConfig) -> type[Step_DefineCommunitiesLouvain] | type[Step_DefineCommunitiesLeiden]:
+def get_community_detection_algorithm(config: MiniKgConfig) -> CommunityDetector:
     if config.community_algorithm == "leiden":
-        return Step_DefineCommunitiesLeiden
-    return Step_DefineCommunitiesLouvain
+        return CommunityDetectorLeiden()
+    return CommunityDetectorLouvain()
 
 
 def execute_step(step: T) -> T:
@@ -151,11 +152,12 @@ class Api:
         master_graph_output = compress_step.output
 
         logging.info("defining communities")
-        define_communities_step = get_define_community_step(self.config)
-        logging.info("using community defining class %s", define_communities_step.__name__)
-        define_communities_step = define_communities_step(
+        community_detection_algo = get_community_detection_algorithm(self.config)
+        logging.info("using community detection algo %s", community_detection_algo.__name__)
+        define_communities_step = Step_DefineCommunities(
             self.config,
             graph=compress_step.output,
+            community_detector=community_detection_algo,
         )
         define_communities_step = self.executor.execute_all([define_communities_step])[0]
         assert define_communities_step.output
