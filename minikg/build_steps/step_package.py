@@ -7,6 +7,7 @@ import networkx as nx
 
 from minikg.build_output import (
     BuildStepOutput_Communities,
+    BuildStepOutput_CommunitySummary,
     BuildStepOutput_IndexedCommunity,
     BuildStepOutput_MultiGraph,
     BuildStepOutput_Package,
@@ -24,11 +25,13 @@ class Step_Package(MiniKgBuilderStep[BuildStepOutput_Package]):
         master_graph: BuildStepOutput_MultiGraph,
         communities: BuildStepOutput_Communities,
         community_indexes: list[BuildStepOutput_IndexedCommunity],
+        summaries_by_id: dict[str, BuildStepOutput_CommunitySummary]
     ):
         super().__init__(config)
         self.communities = communities
         self.master_graph = master_graph
         self.community_indexes = community_indexes
+        self.summaries_by_id = summaries_by_id
         return
 
     @staticmethod
@@ -44,6 +47,10 @@ class Step_Package(MiniKgBuilderStep[BuildStepOutput_Package]):
             G=self.master_graph.G,
             communities=self.communities.communities,
             community_db_names=[idx.semantic_db_name for idx in self.community_indexes],
+            summaries_by_id={
+                community_id: output.data
+                for community_id, output in self.summaries_by_id.items()
+            },
         )
 
     pass

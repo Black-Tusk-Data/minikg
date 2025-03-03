@@ -4,7 +4,7 @@ from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_edge_compressor import GraphEdgeCompressor
 from minikg.graph_merger import GraphMerger
 from minikg.models import MiniKgConfig
-from minikg.build_output import BuildStepOutput_Graph, BuildStepOutput_MultiGraph
+from minikg.build_output import BuildStepOutput_BaseGraph, BuildStepOutput_Graph, BuildStepOutput_MultiGraph
 
 
 class Step_CompressRedundantEdges(MiniKgBuilderStep[BuildStepOutput_MultiGraph]):
@@ -12,7 +12,7 @@ class Step_CompressRedundantEdges(MiniKgBuilderStep[BuildStepOutput_MultiGraph])
         self,
         config: MiniKgConfig,
         *,
-        graph: BuildStepOutput_Graph,
+        graph: BuildStepOutput_BaseGraph,
     ) -> None:
         super().__init__(config)
         self.graph = graph

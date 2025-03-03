@@ -38,6 +38,7 @@ class MiniKgConfig(NamedTuple):
     embedding_size: int = 1024
     embedding_model: str = "jina-embeddings-v3"
     max_relevant_communities: int = 10
+    summary_prompts: dict[str, str] | None = None
     pass
 
 

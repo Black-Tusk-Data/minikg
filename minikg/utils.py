@@ -3,7 +3,7 @@ from pathlib import Path
 import networkx as nx
 import numpy as np
 
-from minikg.build_output import BuildStepOutput_CommunitySummary
+from minikg.build_output import BuildStepOutput_Communities, BuildStepOutput_CommunitySummary
 
 
 def scrub_title_key(d: dict):
@@ -135,3 +135,13 @@ def get_prompt_context_lines_for_community_summary(
         lines.append(f" - {attr}: {summary}")
         pass
     return lines
+
+
+def get_community_summary_compute_order(
+        communities: BuildStepOutput_Communities,
+) -> list[list[str]]:
+    """
+    Return a list of 'stages', the idea being that each stage depends on the previous stages,
+    but can be computed entirely in parallel.
+    """
+    return

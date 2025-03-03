@@ -5,6 +5,7 @@ from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_merger import GraphMerger
 from minikg.models import Community, MiniKgConfig
 from minikg.build_output import (
+    BuildStepOutput_BaseGraph,
     BuildStepOutput_CommunitySummary,
     BuildStepOutput_Graph,
 )
@@ -19,13 +20,13 @@ class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_CommunitySummary
         attribute_prompts: dict[str, str],
         community: Community,
         community_summaries: dict[str, BuildStepOutput_CommunitySummary],
-        graph: BuildStepOutput_Graph,
+        graph_output: BuildStepOutput_BaseGraph,
     ) -> None:
         super().__init__(config)
         self.attribute_prompts = attribute_prompts
         self.community = community
         self.community_summaries = community_summaries
-        self.graph = graph
+        self.graph_output = graph_output
         self.llm_client = OpenAIApiClient("gpt-4o")
         return
 
@@ -37,7 +38,7 @@ class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_CommunitySummary
         return BuildStepOutput_CommunitySummary
 
     def _execute(self) -> BuildStepOutput_CommunitySummary:
-        subgraph = self.graph.G.subgraph(self.community.child_node_ids)
+        subgraph = self.graph_output.G.subgraph(self.community.child_node_ids)
         prompt_context_lines: list[str] = get_prompt_context_lines_for_graph(subgraph)
         for community_id, summary_output in self.community_summaries.items():
             prompt_context_lines.extend(

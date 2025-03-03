@@ -223,10 +223,12 @@ class BuildStepOutput_Package(MiniKgBuildPlanStepOutput):
         G: nx.MultiGraph,  # or just 'Graph'
         communities: list[Community],
         community_db_names: list[str],
+        summaries_by_id: dict[str, dict[str, str]],
     ):
         self.G = G
         self.communities = communities
         self.community_db_names = community_db_names
+        self.summaries_by_id = summaries_by_id
         return
 
     def to_file(self, path: Path) -> None:
@@ -235,6 +237,7 @@ class BuildStepOutput_Package(MiniKgBuildPlanStepOutput):
             "graph_b64": base64.b64encode(graph_bytes).decode("utf-8"),
             "communities": [com.model_dump() for com in self.communities],
             "community_db_names": self.community_db_names,
+            "summaries_by_id": self.summaries_by_id,
         }
         with open(path, "w") as f:
             json.dump(dat, f)
@@ -251,6 +254,7 @@ class BuildStepOutput_Package(MiniKgBuildPlanStepOutput):
                 G=graph,
                 communities=[Community.model_validate(r) for r in dat["communities"]],
                 community_db_names=dat["community_db_names"],
+                summaries_by_id=dat["summaries_by_id"],
             )
         pass
 

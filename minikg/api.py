@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 from typing import Generic, TypeVar
 
-from minikg.build_output import BuildStepOutput_Package
+from minikg.build_output import BuildStepOutput_CommunitySummary, BuildStepOutput_Package
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.build_steps.step_compress_kg_edges import Step_CompressRedundantEdges
 from minikg.build_steps.step_define_communities import Step_DefineCommunitiesLeiden, Step_DefineCommunitiesLouvain
@@ -16,10 +16,12 @@ from minikg.build_steps.step_index_community import Step_IndexCommunity
 from minikg.build_steps.step_merge_kgs import Step_MergeKgs
 from minikg.build_steps.step_package import Step_Package
 from minikg.build_steps.step_split_doc import Step_SplitDoc
+from minikg.build_steps.step_summarize_community import Step_SummarizeCommunity
 from minikg.graph_edge_compressor import GraphEdgeCompressor
 from minikg.graph_semantic_db import GraphSemanticDb
 from minikg.kg_searcher import KgCommunitiesSearcher
-from minikg.models import MiniKgConfig
+from minikg.models import Community, MiniKgConfig
+from minikg.utils import get_community_summary_compute_order
 
 
 DEBUG = bool(int(os.environ.get("DEBUG", 0)))
@@ -42,7 +44,7 @@ def execute_step(step: T) -> T:
     return step
 
 
-class StepExecutor(Generic[T]):
+class StepExecutor:
     MAX_CONCURRENCY = 5  # arbitrary
 
     def __init__(
@@ -115,13 +117,15 @@ class Api:
             Step_SplitDoc(self.config, doc_path=doc_path) for doc_path in source_paths
         ]
         split_doc_steps = self.executor.execute_all(split_doc_steps)
+        assert all([step.output for step in split_doc_steps])
 
         logging.info("extracting chunk-level knowledge graphs")
         extract_chunk_kg_steps = [
             Step_ExtractChunkKg(self.config, fragment=fragment)
             for split_doc in split_doc_steps
             for fragment in split_doc.output.chunks
-        ][:1935]
+            if split_doc.output
+        ]
         extract_chunk_kg_steps = self.executor.execute_all(extract_chunk_kg_steps)
 
         logging.info("merging knowledge graphs")
@@ -141,18 +145,51 @@ class Api:
             graph=merge_step.output,
         )
         compress_step = self.executor.execute_all([compress_step])[0]
-
         assert compress_step.output
+
+        # generally useful
+        master_graph_output = compress_step.output
+
         logging.info("defining communities")
         define_communities_step = get_define_community_step(self.config)
         logging.info("using community defining class %s", define_communities_step.__name__)
-        community_step = define_communities_step(
+        define_communities_step = define_communities_step(
             self.config,
             graph=compress_step.output,
         )
-        community_step = self.executor.execute_all([community_step])[0]
+        define_communities_step = self.executor.execute_all([define_communities_step])[0]
+        assert define_communities_step.output
 
-        assert community_step.output
+        # kind of generally useful
+        communities_by_id: dict[str, Community] = {}
+        for community in define_communities_step.output.communities:
+            communities_by_id[community.id] = community
+            pass
+
+        # SUMMARIZE
+        summaries_by_id: dict[str, BuildStepOutput_CommunitySummary] = {}
+        if self.config.summary_prompts:
+            summary_compute_order: list[list[str]] = get_community_summary_compute_order(
+                define_communities_step.output
+            )
+            for stage in summary_compute_order:
+                stage_summary_steps = [Step_SummarizeCommunity(
+                    self.config,
+                    attribute_prompts=self.config.summary_prompts,
+                    community=communities_by_id[community_id],
+                    community_summaries=summaries_by_id,
+                    graph_output=master_graph_output,
+                ) for community_id in stage]
+                stage_summary_steps = self.executor.execute_all(stage_summary_steps)
+                for community_id, step in zip(stage, stage_summary_steps):
+                    assert step.output
+                    summaries_by_id[community_id] = step.output
+                    pass
+                pass
+            pass
+        # END SUMMARIZE
+
+        # INDEX
         index_community_steps: list[Step_IndexCommunity] = []
         if self.config.index_graph:
             index_community_steps = [
@@ -161,10 +198,11 @@ class Api:
                     master_graph=compress_step.output,
                     community=community,
                 )
-                for i, community in enumerate(community_step.output.communities)
+                for i, community in enumerate(define_communities_step.output.communities)
             ]
             index_community_steps = self.executor.execute_all(index_community_steps)
             pass
+        # END INDEX
 
         # wrap this all up in a way that's easy to load from disk
         assert all([step.output for step in index_community_steps])
@@ -173,8 +211,8 @@ class Api:
                 Step_Package(
                     self.config,
                     master_graph=compress_step.output,
-                    communities=community_step.output,
-                    community_indexes=[step.output for step in index_community_steps],
+                    communities=define_communities_step.output,
+                    community_indexes=[step.output for step in index_community_steps if step.output],
                 )
             ]
         )[0]
