@@ -1,0 +1,76 @@
+from concurrent.futures import ProcessPoolExecutor
+import logging
+import os
+from typing import TypeVar
+
+from minikg.build_steps.base_step import MiniKgBuilderStep
+from minikg.models import MiniKgConfig
+from minikg.step_coordinators.base import StepCoordinator
+
+
+DEBUG = bool(int(os.environ.get("DEBUG", 0)))
+if DEBUG:
+    logging.warning("EXECUTING IN DEBUG MODE")
+    pass
+
+
+T = TypeVar("T", bound=MiniKgBuilderStep)
+
+
+def execute_step(step: T) -> T:
+    step.execute()
+    return step
+
+
+class StepExecutor:
+    MAX_CONCURRENCY = 5  # arbitrary
+
+    def __init__(
+        self,
+        config: MiniKgConfig,
+    ):
+        self.config = config
+        return
+
+    def _execute_all_steps(self, steps: list[T]) -> list[T]:
+        if not steps:
+            return []
+        logging.debug(
+            "executing %d steps of type %s",
+            len(steps),
+            steps[0].__class__.__name__,
+        )
+        if DEBUG:
+            for step in steps:
+                return [execute_step(step) for step in steps]
+            pass
+        with ProcessPoolExecutor(max_workers=self.MAX_CONCURRENCY) as ex:
+            completed_steps = list(ex.map(execute_step, steps))
+            return completed_steps
+        pass
+
+    def run_all_coordinators(self, coordinators: list[StepCoordinator]):
+        executed_steps: dict[type[MiniKgBuilderStep], list[MiniKgBuilderStep]] = {}
+        for coordinator in coordinators:
+            # required_step_types = coordinator.get_required_step_types()
+            step_kwargs = {}
+            for required_step_type in coordinator.get_required_step_types():
+                if required_step_type not in executed_steps:
+                    logging.error(
+                        "coordinator %s depends on step %s, which has not executed yet!",
+                        coordinator.__class__.__name__,
+                        required_step_type,
+                    )
+                    raise Exception(f"missing required step '{required_step_type}'")
+                _, step_name = required_step_type.__name__.split("Step_", 1)
+                step_kwargs[step_name] = executed_steps[required_step_type]
+                pass
+            coordinator_steps = coordinator.get_steps_to_execute(**step_kwargs)
+            coordinator_steps = self._execute_all_steps(coordinator_steps)
+            assert all(
+                step.output
+                for step in coordinator_steps
+            )            
+            executed_steps[coordinator.get_step_type()] = coordinator_steps
+            pass
+        return

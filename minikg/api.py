@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 from typing import Generic, TypeVar
 
-from minikg.build_output import BuildStepOutput_CommunitySummary, BuildStepOutput_Package
+from minikg.build_output import BuildStepOutput_CommunitySummary, BuildStepOutput_Package, MiniKgBuildPlanStepOutput
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.build_steps.step_compress_kg_edges import Step_CompressRedundantEdges
 from minikg.build_steps.step_define_communities import Step_DefineCommunities
@@ -23,54 +23,7 @@ from minikg.graphtools.community_detection import CommunityDetector, CommunityDe
 from minikg.graphtools.community_summaries import get_community_summary_compute_order
 from minikg.kg_searcher import KgCommunitiesSearcher
 from minikg.models import Community, MiniKgConfig
-
-
-DEBUG = bool(int(os.environ.get("DEBUG", 0)))
-if DEBUG:
-    logging.warning("EXECUTING IN DEBUG MODE")
-    pass
-
-
-T = TypeVar("T", bound=MiniKgBuilderStep)
-
-
-def get_community_detection_algorithm(config: MiniKgConfig) -> CommunityDetector:
-    if config.community_algorithm == "leiden":
-        return CommunityDetectorLeiden()
-    return CommunityDetectorLouvain()
-
-
-def execute_step(step: T) -> T:
-    step.execute()
-    return step
-
-
-class StepExecutor:
-    MAX_CONCURRENCY = 5  # arbitrary
-
-    def __init__(
-        self,
-        config: MiniKgConfig,
-    ):
-        self.config = config
-        return
-
-    def execute_all(self, steps: list[T]) -> list[T]:
-        if not steps:
-            return []
-        logging.debug(
-            "executing %d steps of type %s",
-            len(steps),
-            steps[0].__class__.__name__,
-        )
-        if DEBUG:
-            for step in steps:
-                return [execute_step(step) for step in steps]
-            pass
-        with ProcessPoolExecutor(max_workers=self.MAX_CONCURRENCY) as ex:
-            completed_steps = list(ex.map(execute_step, steps))
-            return completed_steps
-        pass
+from minikg.step_executor import StepExecutor
 
 
 class Api:
@@ -88,7 +41,14 @@ class Api:
                 os.makedirs(dirpath)
                 pass
             pass
+        self.executed_steps: dict[type[MiniKgBuilderStep], list[MiniKgBuilderStep]] = {}
         return
+
+    def _get_community_detection_algorithm(self) -> CommunityDetector:
+        if self.config.community_algorithm == "leiden":
+            return CommunityDetectorLeiden()
+        return CommunityDetectorLouvain()
+
 
     def _load_package(self) -> BuildStepOutput_Package:
         return BuildStepOutput_Package.from_file(
@@ -98,61 +58,32 @@ class Api:
             / str(self.config.version)
         )
 
-    def _gather_input_files(self) -> list[Path]:
-        # this can be its own step, where we check with the LLM if it's a code file or not
-        ignore_expressions = [re.compile(rf"{self.config.input_dir}/\.git/?")]
-        return [
-            path
-            for path in self.config.input_dir.rglob(self.config.input_file_exp)
-            if not any(expr.search(str(path)) for expr in ignore_expressions)
-            and path.is_file()
-        ]
+    def _merge_chunk_level_kgs(self, steps_extract_chunk_kgs: list[Step_ExtractChunkKg]) -> list[Step_MergeKgs]:
+        logging.info("merging knowledge graphs")
+
+        # only one step needed!
+        merge_steps = 
+        return self.executor.execute_all(merge_steps)
+
+    def _compress_redundant_edges(self, steps_merge_chunk_level_kgs: list[Step_MergeKgs]) -> list[Step_CompressRedundantEdges]:
+        logging.info("compressing redundant knowledge graph edges")
+        compress_step = [Step_CompressRedundantEdges(
+            self.config,
+            graph=step.output,
+        ) for step in steps_merge_chunk_level_kgs]
+        return self.executor.execute_all([compress_step])
 
     def build_kg(self) -> None:
-        source_paths = self._gather_input_files()
-        logging.info("found %d source files", len(source_paths))
+        last_steps = self._split_docs()
+        last_steps = self._extract_chunk_level_kgs(last_steps)
+        last_steps = self._merge_chunk_level_kgs(last_steps)
+        last_steps = self._compress_redundant_edges(last_steps)
 
-        logging.info("splitting documents")
-        # split docs
-        split_doc_steps = [
-            Step_SplitDoc(self.config, doc_path=doc_path) for doc_path in source_paths
-        ]
-        split_doc_steps = self.executor.execute_all(split_doc_steps)
-        assert all([step.output for step in split_doc_steps])
-
-        logging.info("extracting chunk-level knowledge graphs")
-        extract_chunk_kg_steps = [
-            Step_ExtractChunkKg(self.config, fragment=fragment)
-            for split_doc in split_doc_steps
-            for fragment in split_doc.output.chunks
-            if split_doc.output
-        ]
-        extract_chunk_kg_steps = self.executor.execute_all(extract_chunk_kg_steps)
-
-        logging.info("merging knowledge graphs")
-        graphs_to_merge = [
-            step.output for step in extract_chunk_kg_steps if step.output  # for typing
-        ]
-        merge_step = Step_MergeKgs(
-            self.config,
-            graphs=graphs_to_merge,
-        )
-        merge_step = self.executor.execute_all([merge_step])[0]
-
-        assert merge_step.output
-        logging.info("compressing redundant knowledge graph edges")
-        compress_step = Step_CompressRedundantEdges(
-            self.config,
-            graph=merge_step.output,
-        )
-        compress_step = self.executor.execute_all([compress_step])[0]
-        assert compress_step.output
-
-        # generally useful
-        master_graph_output = compress_step.output
+        # # generally useful
+        # master_graph_output = compress_step.output
 
         logging.info("defining communities")
-        community_detection_algo = get_community_detection_algorithm(self.config)
+        community_detection_algo = self._get_community_detection_algorithm()
         logging.info("using community detection algo %s", community_detection_algo.__name__)
         define_communities_step = Step_DefineCommunities(
             self.config,
