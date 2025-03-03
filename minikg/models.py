@@ -105,8 +105,8 @@ class Edge(BaseModel):
 
 
 class Community(BaseModel):
-    child_node_ids: list[str] = Field(default_factory=list)
     child_community_ids: list[str] = Field(default_factory=list)
+    child_node_ids: list[str] = Field(default_factory=list)
     id: str
     pass
 
