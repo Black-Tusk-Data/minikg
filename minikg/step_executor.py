@@ -67,10 +67,26 @@ class StepExecutor:
                 pass
             coordinator_steps = coordinator.get_steps_to_execute(**step_kwargs)
             coordinator_steps = self._execute_all_steps(coordinator_steps)
+            step_type = coordinator.get_step_type()
             assert all(
                 step.output
                 for step in coordinator_steps
-            )            
-            executed_steps[coordinator.get_step_type()] = coordinator_steps
+            )
+            executed_steps[step_type] = coordinator_steps
+            # extra
+            while True:
+                extra_steps = coordinator.iterate_on_steps(
+                    executed_steps_this_coordinator=executed_steps[step_type],
+                    **step_kwargs,
+                )
+                extra_steps = self._execute_all_steps(extra_steps)
+                assert all(
+                    step.output
+                    for step in extra_steps
+                )
+                executed_steps[step_type].extend(extra_steps)
+                if not extra_steps:
+                    break
+                pass
             pass
         return

@@ -23,10 +23,16 @@ from minikg.graphtools.community_detection import CommunityDetector, CommunityDe
 from minikg.graphtools.community_summaries import get_community_summary_compute_order
 from minikg.kg_searcher import KgCommunitiesSearcher
 from minikg.models import Community, MiniKgConfig
+from minikg.step_coordinators import STEP_COORDINATOR_ORDER
+from minikg.step_coordinators.extract_chunk_level_kgs import StepCoordinator_ExtractChunkLevelKgs
+from minikg.step_coordinators.merge_chunk_level_kgs import StepCoordinator_MergeChunkLevelKgs
+from minikg.step_coordinators.split_docs import StepCoordinator_SplitDocs
 from minikg.step_executor import StepExecutor
 
 
 class Api:
+
+
     def __init__(
         self,
         *,
@@ -44,12 +50,6 @@ class Api:
         self.executed_steps: dict[type[MiniKgBuilderStep], list[MiniKgBuilderStep]] = {}
         return
 
-    def _get_community_detection_algorithm(self) -> CommunityDetector:
-        if self.config.community_algorithm == "leiden":
-            return CommunityDetectorLeiden()
-        return CommunityDetectorLouvain()
-
-
     def _load_package(self) -> BuildStepOutput_Package:
         return BuildStepOutput_Package.from_file(
             # bit hackish this handover here...
@@ -58,40 +58,16 @@ class Api:
             / str(self.config.version)
         )
 
-    def _merge_chunk_level_kgs(self, steps_extract_chunk_kgs: list[Step_ExtractChunkKg]) -> list[Step_MergeKgs]:
-        logging.info("merging knowledge graphs")
-
-        # only one step needed!
-        merge_steps = 
-        return self.executor.execute_all(merge_steps)
-
-    def _compress_redundant_edges(self, steps_merge_chunk_level_kgs: list[Step_MergeKgs]) -> list[Step_CompressRedundantEdges]:
-        logging.info("compressing redundant knowledge graph edges")
-        compress_step = [Step_CompressRedundantEdges(
-            self.config,
-            graph=step.output,
-        ) for step in steps_merge_chunk_level_kgs]
-        return self.executor.execute_all([compress_step])
-
     def build_kg(self) -> None:
-        last_steps = self._split_docs()
-        last_steps = self._extract_chunk_level_kgs(last_steps)
-        last_steps = self._merge_chunk_level_kgs(last_steps)
-        last_steps = self._compress_redundant_edges(last_steps)
+        step_coordinators = [
+            coordinator(self.config)
+            for coordinator in STEP_COORDINATOR_ORDER
+        ]
+        self.executor.run_all_coordinators(step_coordinators)
 
         # # generally useful
         # master_graph_output = compress_step.output
 
-        logging.info("defining communities")
-        community_detection_algo = self._get_community_detection_algorithm()
-        logging.info("using community detection algo %s", community_detection_algo.__name__)
-        define_communities_step = Step_DefineCommunities(
-            self.config,
-            graph=compress_step.output,
-            community_detector=community_detection_algo,
-        )
-        define_communities_step = self.executor.execute_all([define_communities_step])[0]
-        assert define_communities_step.output
 
         # kind of generally useful
         communities_by_id: dict[str, Community] = {}

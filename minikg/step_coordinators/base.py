@@ -29,4 +29,11 @@ class StepCoordinator(abc.ABC, Generic[T]):
     def get_steps_to_execute(self, **kwargs) -> list[T]:
         pass
 
+    def iterate_on_steps(
+            self,
+            executed_steps_this_coordinator: list[T],
+            **kwargs,
+    ) -> list[T]:
+        return []
+
     pass
