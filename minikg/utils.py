@@ -3,6 +3,8 @@ from pathlib import Path
 import networkx as nx
 import numpy as np
 
+from minikg.build_output import BuildStepOutput_CommunitySummary
+
 
 def scrub_title_key(d: dict):
     """
@@ -100,7 +102,9 @@ def flatten_multigraph(G: nx.MultiGraph) -> nx.Graph:
 
 
 # TODO TEST
-def get_prompt_context_for_graph(G: nx.Graph) -> str:
+def get_prompt_context_lines_for_graph(G: nx.Graph) -> list[str]:
+    if not G.nodes:
+        return []
     node_sections: list[str] = []
     for node_id in G.nodes:
         node_data = G.nodes[node_id]
@@ -118,4 +122,16 @@ def get_prompt_context_for_graph(G: nx.Graph) -> str:
         lines.append("")
         pass
 
-    return "\n".join(node_sections)
+    return node_sections
+
+
+def get_prompt_context_lines_for_community_summary(
+        *,
+        community_id: str,
+        summary_output: BuildStepOutput_CommunitySummary
+) -> list[str]:
+    lines: list[str] = [f"Community {community_id}"]
+    for attr, summary in summary_output.data.items():
+        lines.append(f" - {attr}: {summary}")
+        pass
+    return lines

@@ -123,11 +123,11 @@ class BuildStepOutput_Text(MiniKgBuildPlanStepOutput):
     pass
 
 
-class BuildStepOutput_Dict(MiniKgBuildPlanStepOutput):
+class BuildStepOutput_CommunitySummary(MiniKgBuildPlanStepOutput):
     def __init__(
             self,
             *,
-            data: dict
+            data: dict[str, str],
     ):
         self.data = data
         return

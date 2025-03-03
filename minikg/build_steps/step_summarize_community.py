@@ -5,24 +5,26 @@ from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_merger import GraphMerger
 from minikg.models import Community, MiniKgConfig
 from minikg.build_output import (
-    BuildStepOutput_Dict,
+    BuildStepOutput_CommunitySummary,
     BuildStepOutput_Graph,
 )
-from minikg.utils import build_prompt_context_from_graph
+from minikg.utils import get_prompt_context_lines_for_community_summary, get_prompt_context_lines_for_graph
 
 
-class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_Dict]):
+class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_CommunitySummary]):
     def __init__(
         self,
         config: MiniKgConfig,
         *,
         attribute_prompts: dict[str, str],
         community: Community,
+        community_summaries: dict[str, BuildStepOutput_CommunitySummary],
         graph: BuildStepOutput_Graph,
     ) -> None:
         super().__init__(config)
         self.attribute_prompts = attribute_prompts
         self.community = community
+        self.community_summaries = community_summaries
         self.graph = graph
         self.llm_client = OpenAIApiClient("gpt-4o")
         return
@@ -32,12 +34,21 @@ class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_Dict]):
 
     @staticmethod
     def get_output_type():
-        return BuildStepOutput_Dict
+        return BuildStepOutput_CommunitySummary
 
-    def _execute(self) -> BuildStepOutput_Dict:
-        subgraph = self.graph.G.subgraph(self.community)
-        prompt_context = build_prompt_context_from_graph
-        # TODO iss-7: should have edge 'description' as well
+    def _execute(self) -> BuildStepOutput_CommunitySummary:
+        subgraph = self.graph.G.subgraph(self.community.child_node_ids)
+        prompt_context_lines: list[str] = get_prompt_context_lines_for_graph(subgraph)
+        for community_id, summary_output in self.community_summaries.items():
+            prompt_context_lines.extend(
+                get_prompt_context_lines_for_community_summary(
+                    community_id=community_id,
+                    summary_output=summary_output,
+                )
+            )
+            pass
+        prompt_context = "\n".join(prompt_context_lines)
+
         summary_data: dict[str, str] = {}
         for name, prompt in self.attribute_prompts.items():
             result = self.llm_client.chat_completion(
@@ -60,6 +71,6 @@ class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_Dict]):
             summary_data[name] = result.content
             pass
 
-        return BuildStepOutput_Dict(data=summary_data)
+        return BuildStepOutput_CommunitySummary(data=summary_data)
 
     pass
