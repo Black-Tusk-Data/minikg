@@ -117,3 +117,9 @@ class GraphSearchResult(NamedTuple):
     nodes: list[Node]
     edges: list[Edge]
     pass
+
+
+class LlmResponse(NamedTuple):
+    message: str | None = None
+    structured_output: dict | None = None
+    pass

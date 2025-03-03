@@ -1,6 +1,3 @@
-from expert_llm.models import ChatBlock
-from expert_llm.remote.openai_shaped_client_implementations import OpenAIApiClient
-
 from minikg.services import services
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_merger import GraphMerger
@@ -28,7 +25,6 @@ class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_CommunitySummary
         self.community = community
         self.community_summaries = community_summaries
         self.graph_output = graph_output
-        self.llm_client = OpenAIApiClient("gpt-4o")
         return
 
     def get_id(self) -> str:
@@ -63,7 +59,7 @@ class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_CommunitySummary
                 ]),
                 user=prompt_context,
             )
-            summary_data[name] = summary
+            summary_data[name] = summary.message
             pass
 
         return BuildStepOutput_CommunitySummary(data=summary_data)

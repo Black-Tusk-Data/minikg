@@ -11,11 +11,12 @@ Within a community, a query looks like:
 """
 
 import logging
+
 from btdcore.utils import map_multithreaded
-from expert_llm.models import ChatBlock
-from expert_llm.remote.openai_shaped_client_implementations import OpenAIApiClient
+
 from minikg.graph_semantic_db import GraphSemanticDb
 from minikg.models import MiniKgConfig, Node, Edge, GraphSearchResult
+from minikg.services import services
 
 
 def get_context(search_result: GraphSearchResult):
@@ -43,7 +44,6 @@ class KgCommunitiesSearcher:
         self.config = config
         self.community_names = community_names
         self.community_graph_dbs = community_graph_dbs
-        self.llm_client = OpenAIApiClient("gpt-4o")
         self.threshold_distance = 1 - config.community_threshold_similarity
         return
 
@@ -86,22 +86,19 @@ class KgCommunitiesSearcher:
         query: str,
         answer: str,
     ) -> bool:
-        relevance_result = self.llm_client.structured_completion_raw(
-            chat_blocks=[
-                ChatBlock(
-                    role="user",
-                    content="\n".join(
-                        [
-                            (
-                                "Does the following text passage help to answer the query"
-                                f""" "{query}"?"""
-                            ),
-                            "TEXT PASSAGE:",
-                            answer,
-                        ]
+        relevance_result = services.llm_api.completion(
+            name="check-answer-relevant",
+            system=f"You are a {self.config.knowledge_domain} expert.",
+            user="\n".join(
+                [
+                    (
+                        "Does the following text passage help to answer the query"
+                        f""" "{query}"?"""
                     ),
-                ),
-            ],
+                    "TEXT PASSAGE:",
+                    answer,
+                ]
+            ),
             output_schema={
                 "type": "object",
                 "required": ["is_useful"],
@@ -113,7 +110,7 @@ class KgCommunitiesSearcher:
                 },
             },
         )
-        return relevance_result["is_useful"]
+        return relevance_result.structured_output["is_useful"]
 
     def check_statement_is_grounded(
         self,
@@ -121,22 +118,19 @@ class KgCommunitiesSearcher:
         statement: str,
         context: str,
     ) -> bool:
-        grounded_result = self.llm_client.structured_completion_raw(
-            chat_blocks=[
-                ChatBlock(
-                    role="user",
-                    content="\n".join(
-                        [
-                            (
-                                "Does the following statement include any information from outside the following text passage? "
-                                f""" "{statement}"?"""
-                            ),
-                            "TEXT PASSAGE:",
-                            context,
-                        ]
+        grounded_result = services.llm_api.completion(
+            name="check-statement-grounded",
+            system=f"You are a {self.config.knowledge_domain} expert.",
+            user="\n".join(
+                [
+                    (
+                        "Does the following statement include any information from outside the following text passage? "
+                        f""" "{statement}"?"""
                     ),
-                ),
-            ],
+                    "TEXT PASSAGE:",
+                    context,
+                ]
+            ),
             output_schema={
                 "type": "object",
                 "required": ["contains_external_information"],
@@ -148,7 +142,7 @@ class KgCommunitiesSearcher:
                 },
             },
         )
-        return not grounded_result["contains_external_information"]
+        return not grounded_result.structured_output["contains_external_information"]
 
     def answer(self, query: str, k: int) -> dict[str, str]:
         """
@@ -165,66 +159,50 @@ class KgCommunitiesSearcher:
             if not search_result:
                 continue
             context = get_context(search_result)
-            community_answer = self.llm_client.chat_completion(
-                [
-                    ChatBlock(
-                        role="system",
-                        content=" ".join(
-                            [
-                                f"You are a helpful {self.config.knowledge_domain} expert.",
-                                "Your responses MAY ONLY REFER TO THE FOLLOWING CONTEXT:",
-                                "\n",
-                                context,
-                            ]
-                        ),
-                    ),
-                    ChatBlock(
-                        role="user",
-                        content=query,
-                    ),
-                ]
-            )
+            community_answer = services.llm_api.completion(
+                system=" ".join(
+                    [
+                        f"You are a helpful {self.config.knowledge_domain} expert.",
+                        "Your responses MAY ONLY REFER TO THE FOLLOWING CONTEXT:",
+                        "\n",
+                        context,
+                    ]
+                ),
+                user=query,
+            ).message
 
             if not self.check_answer_is_relevant(
-                query=query, answer=community_answer.content
+                query=query, answer=community_answer
             ):
                 logging.debug("community %s answer deemed irrelevant", community_name)
                 continue
 
             if not self.check_statement_is_grounded(
-                statement=community_answer.content,
+                statement=community_answer,
                 context=context,
             ):
                 logging.debug("community %s answer deemed ungrounded", community_name)
                 continue
 
-            responses[community_name] = community_answer.content
+            responses[community_name] = community_answer
             pass
 
         if not responses:
             return {}
 
         final_context = "\n".join(responses.values())
-        final_answer = self.llm_client.chat_completion(
-            [
-                ChatBlock(
-                    role="system",
-                    content=" ".join(
-                        [
-                            f"You are a helpful {self.config.knowledge_domain} expert.",
-                            "Your responses MAY ONLY REFER TO THE FOLLOWING CONTEXT:",
-                            "\n",
-                            final_context,
-                        ]
-                    ),
-                ),
-                ChatBlock(
-                    role="user",
-                    content=query,
-                ),
-            ]
-        )
-        responses["FINAL"] = final_answer.content
+        final_answer = services.llm_api.completion(
+            system=" ".join(
+                [
+                    f"You are a helpful {self.config.knowledge_domain} expert.",
+                    "Your responses MAY ONLY REFER TO THE FOLLOWING CONTEXT:",
+                    "\n",
+                    final_context,
+                ]
+            ),
+            user=query,
+        ).message
+        responses["FINAL"] = final_answer
         return responses
 
     pass
