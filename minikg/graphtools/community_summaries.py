@@ -1,4 +1,5 @@
 from collections import deque
+import logging
 
 from minikg.models import Community
 from minikg.build_output import BuildStepOutput_Communities
@@ -11,6 +12,8 @@ def get_community_summary_compute_order(
     Return a list of 'stages', the idea being that each stage depends on the previous stages,
     but can be computed entirely in parallel.
     """
+    MAX_ROUNDS = 100            # to avoid infinite looping
+
     # first layer communities only have nodes as children
     stages: list[list[str]] = [[]]
     to_summarize: deque[Community] = deque([])
@@ -24,7 +27,10 @@ def get_community_summary_compute_order(
             pass
         pass
     available_summaries = set(stages[0])
-    while to_summarize:
+
+    for _ in range(MAX_ROUNDS):
+        if not to_summarize:
+            break
         stages.append([])
         for i in range(len(to_summarize)):
             community = to_summarize.popleft()
@@ -37,5 +43,14 @@ def get_community_summary_compute_order(
                 to_summarize.append(community)
                 pass
             pass
+        available_summaries.update(stages[-1])
         pass
+
+    else:
+        logging.error(
+            "after %d iterations, still had %d communities left to compute",
+            MAX_ROUNDS,
+            len(to_summarize),
+        )
+        raise Exception("unable to determine community summary order")
     return stages
