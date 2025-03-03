@@ -1,6 +1,7 @@
 from expert_llm.models import ChatBlock
 from expert_llm.remote.openai_shaped_client_implementations import OpenAIApiClient
 
+from minikg.services import services
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_merger import GraphMerger
 from minikg.models import Community, MiniKgConfig
@@ -52,24 +53,17 @@ class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_CommunitySummary
 
         summary_data: dict[str, str] = {}
         for name, prompt in self.attribute_prompts.items():
-            result = self.llm_client.chat_completion(
-                [
-                    ChatBlock(
-                        role="system",
-                        content=" ".join ([
-                            f"You are a {self.config.knowledge_domain} expert.",
-                            "Your task is to extract information from a provided knowledge graph.",
-                            "Refer ONLY to information from the knowledge graph in your responses.",
-                            prompt,
-                        ])
-                    ),
-                    ChatBlock(
-                        role="user",
-                        content=prompt_context,
-                    )
-                ]
+            summary = services.llm_api.completion(
+                req_name="summarize-community",
+                system=" ".join ([
+                    f"You are a {self.config.knowledge_domain} expert.",
+                    "Your task is to extract information from a provided knowledge graph.",
+                    "Refer ONLY to information from the knowledge graph in your responses.",
+                    prompt,
+                ]),
+                user=prompt_context,
             )
-            summary_data[name] = result.content
+            summary_data[name] = summary
             pass
 
         return BuildStepOutput_CommunitySummary(data=summary_data)
