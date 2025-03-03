@@ -5,13 +5,13 @@ from typing import Type
 import networkx as nx
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
+from minikg.graphtools.flatten import flatten_multigraph
 from minikg.models import Community, MiniKgConfig
 from minikg.build_output import (
     BuildStepOutput_Graph,
     BuildStepOutput_MultiGraph,
     BuildStepOutput_Communities,
 )
-from minikg.utils import flatten_multigraph
 
 
 class Step_DefineCommunitiesLouvain(MiniKgBuilderStep[BuildStepOutput_Communities]):

@@ -9,6 +9,10 @@ dotest() {
     fi
 }
 
-for fname in $(git ls-files --others --exclude-standard| grep --color=never -E '.*_test\.py$'); do
+for fname in $(git ls-files --others --exclude-standard | grep --color=never -E '.*_test\.py$'); do
+    dotest "${fname}"
+done
+
+for fname in $(git ls-files | grep --color=never -E '.*_test\.py$'); do
     dotest "${fname}"
 done

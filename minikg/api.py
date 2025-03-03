@@ -19,9 +19,9 @@ from minikg.build_steps.step_split_doc import Step_SplitDoc
 from minikg.build_steps.step_summarize_community import Step_SummarizeCommunity
 from minikg.graph_edge_compressor import GraphEdgeCompressor
 from minikg.graph_semantic_db import GraphSemanticDb
+from minikg.graphtools.community_summaries import get_community_summary_compute_order
 from minikg.kg_searcher import KgCommunitiesSearcher
 from minikg.models import Community, MiniKgConfig
-from minikg.utils import get_community_summary_compute_order
 
 
 DEBUG = bool(int(os.environ.get("DEBUG", 0)))
