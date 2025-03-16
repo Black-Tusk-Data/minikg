@@ -63,7 +63,7 @@ class StepExecutor:
                     )
                     raise Exception(f"missing required step '{required_step_type}'")
                 _, step_name = required_step_type.__name__.split("Step_", 1)
-                step_kwargs[step_name] = executed_steps[required_step_type]
+                step_kwargs[f"steps_{step_name}"] = executed_steps[required_step_type]
                 pass
             coordinator_steps = coordinator.get_steps_to_execute(**step_kwargs)
             coordinator_steps = self._execute_all_steps(coordinator_steps)

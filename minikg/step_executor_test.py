@@ -102,6 +102,60 @@ class Test_StepExecutor(unittest.TestCase):
         )
         return
 
+    def test_two_coordinators(self):
+        class StepCoordinator_Test1(StepCoordinator):
+            def get_required_step_types(self):
+                return []
+
+            def get_step_type(self):
+                return Step_Test1
+
+            def get_steps_to_execute(self, **kwargs):
+                return [
+                    Step_Test1("1"),
+                    Step_Test1("2"),
+                    Step_Test1("3"),
+                ]
+
+            pass
+
+        class StepCoordinator_Test2(StepCoordinator):
+            def get_required_step_types(self):
+                return [Step_Test1]
+
+            def get_step_type(self):
+                return Step_Test2
+
+            def get_steps_to_execute(
+                self,
+                steps_Test1: list[Step_Test1],
+                **kwargs,
+            ):
+                labels = [step.output.text.split(":")[-1] for step in steps_Test1]
+                return [Step_Test2(label) for label in labels]
+
+            pass
+
+        se = StepExecutor(config)
+        se.run_all_coordinators(
+            [
+                StepCoordinator_Test1(config=config),
+                StepCoordinator_Test2(config=config),
+            ]
+        )
+        self.assertEqual(
+            EXECUTED_STEPS,
+            [
+                "Step_Test1:1",
+                "Step_Test1:2",
+                "Step_Test1:3",
+                "Step_Test2:1",
+                "Step_Test2:2",
+                "Step_Test2:3",
+            ],
+        )
+        return
+
     pass
 
 
