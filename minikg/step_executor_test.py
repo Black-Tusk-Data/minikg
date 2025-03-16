@@ -24,13 +24,19 @@ config = MiniKgConfig(
 
 
 class BaseTestStep(MiniKgBuilderStep[BuildStepOutput_Text]):
+    def __init__(self, label: str):
+        super().__init__(config, ignore_cache=True)
+        self.label = label
+        return
+
     @staticmethod
     def get_output_type() -> type[BuildStepOutput_Text]:
         return BuildStepOutput_Text
 
     def _execute(self) -> BuildStepOutput_Text:
-        EXECUTED_STEPS.append(self.__class__.__name__)
-        return BuildStepOutput_Text(text=self.__class__.__name__)
+        text = ":".join([self.__class__.__name__, self.label])
+        EXECUTED_STEPS.append(text)
+        return BuildStepOutput_Text(text=text)
 
     def get_id(self):
         return "id-test"
@@ -52,6 +58,7 @@ class Step_Test3(BaseTestStep):
 
 class Test_StepExecutor(unittest.TestCase):
     # TODO: need to 'before each' set the executed steps to []
+
     def test_one_coordinator_one_step(self):
         class StepCoordinator_Test1(StepCoordinator):
             def get_required_step_types(self):
@@ -61,13 +68,38 @@ class Test_StepExecutor(unittest.TestCase):
                 return Step_Test1
 
             def get_steps_to_execute(self, **kwargs):
-                return [Step_Test1(config=self.config, ignore_cache=True)]
+                return [Step_Test1("1")]
 
             pass
 
         se = StepExecutor(config)
         se.run_all_coordinators([StepCoordinator_Test1(config=config)])
-        self.assertEqual(EXECUTED_STEPS, ["Step_Test1"])
+        self.assertEqual(EXECUTED_STEPS, ["Step_Test1:1"])
+        return
+
+    def test_one_coordinator_multiple_steps(self):
+        class StepCoordinator_Test1(StepCoordinator):
+            def get_required_step_types(self):
+                return []
+
+            def get_step_type(self):
+                return Step_Test1
+
+            def get_steps_to_execute(self, **kwargs):
+                return [Step_Test1("1"), Step_Test1("2"), Step_Test1("3")]
+
+            pass
+
+        se = StepExecutor(config)
+        se.run_all_coordinators([StepCoordinator_Test1(config=config)])
+        self.assertEqual(
+            EXECUTED_STEPS,
+            [
+                "Step_Test1:1",
+                "Step_Test1:2",
+                "Step_Test1:3",
+            ],
+        )
         return
 
     pass
