@@ -11,18 +11,25 @@ from minikg.models import Community
 class Test_flatten(unittest.TestCase):
     def test_one(self):
         multi_G = nx.MultiGraph()
-        multi_G.add_nodes_from([
-            "A", "B", "C", "D",
-        ])
-        multi_G.add_edges_from([
-            ("A", "B"),
-            ("A", "B"),
-            ("A", "B"),
-            ("B", "C"),
-            ("B", "C"),
-            ("C", "D"),
-            ("A", "D"),
-        ])
+        multi_G.add_nodes_from(
+            [
+                "A",
+                "B",
+                "C",
+                "D",
+            ]
+        )
+        multi_G.add_edges_from(
+            [
+                ("A", "B"),
+                ("A", "B"),
+                ("A", "B"),
+                ("B", "C"),
+                ("B", "C"),
+                ("C", "D"),
+                ("A", "D"),
+            ]
+        )
         self.assertEqual(
             len(multi_G.edges),
             7,
@@ -48,6 +55,7 @@ class Test_flatten(unittest.TestCase):
         return
 
     pass
+
 
 if __name__ == "__main__":
     unittest.main()

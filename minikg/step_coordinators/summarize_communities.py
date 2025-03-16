@@ -25,10 +25,10 @@ class StepCoordinator_SummarizeCommunities(StepCoordinator):
         return Step_SummarizeCommunity
 
     def get_steps_to_execute(
-            self,
-            *,
-            steps_DefineCommunities: list[Step_DefineCommunities],
-            **kwargs,
+        self,
+        *,
+        steps_DefineCommunities: list[Step_DefineCommunities],
+        **kwargs,
     ) -> list[Step_SummarizeCommunity]:
         if not self.config.summary_prompts:
             return []
@@ -42,26 +42,25 @@ class StepCoordinator_SummarizeCommunities(StepCoordinator):
             pass
 
         self.summary_compute_order.extend(
-            get_community_summary_compute_order(
-                self.step_DefineCommunities.output
-            )
+            get_community_summary_compute_order(self.step_DefineCommunities.output)
         )
 
         first_stage = self.summary_compute_order.popleft()
-        return [Step_SummarizeCommunity(
-            self.config,
-            attribute_prompts=self.config.summary_prompts,
-            community=self.communities_by_id[community_id],
-            community_summaries=self.summaries_by_id,
-            graph_output=self.step_DefineCommunities.graph,
-        ) for community_id in first_stage]
+        return [
+            Step_SummarizeCommunity(
+                self.config,
+                attribute_prompts=self.config.summary_prompts,
+                community=self.communities_by_id[community_id],
+                community_summaries=self.summaries_by_id,
+                graph_output=self.step_DefineCommunities.graph,
+            )
+            for community_id in first_stage
+        ]
 
     def iterate_on_steps(
-            self,
-            executed_steps_this_coordinator: list[Step_SummarizeCommunity],
-            **kwargs
+        self, executed_steps_this_coordinator: list[Step_SummarizeCommunity], **kwargs
     ) -> list[Step_SummarizeCommunity]:
-        assert self.config.summary_prompts # typing
+        assert self.config.summary_prompts  # typing
         assert self.step_DefineCommunities
         if not self.summary_compute_order:
             return []
@@ -72,11 +71,15 @@ class StepCoordinator_SummarizeCommunities(StepCoordinator):
             pass
 
         stage = self.summary_compute_order.popleft()
-        return [Step_SummarizeCommunity(
-            self.config,
-            attribute_prompts=self.config.summary_prompts,
-            community=self.communities_by_id[community_id],
-            community_summaries=self.summaries_by_id,
-            graph_output=self.step_DefineCommunities.graph,
-        ) for community_id in stage]
+        return [
+            Step_SummarizeCommunity(
+                self.config,
+                attribute_prompts=self.config.summary_prompts,
+                community=self.communities_by_id[community_id],
+                community_summaries=self.summaries_by_id,
+                graph_output=self.step_DefineCommunities.graph,
+            )
+            for community_id in stage
+        ]
+
     pass

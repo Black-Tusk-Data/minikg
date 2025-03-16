@@ -10,13 +10,13 @@ class LlmApi:
         return
 
     def completion(
-            self,
-            *,
-            req_name: str,
-            system: str,
-            user: str,
-            output_schema: dict | None = None,
-            max_tokens: int=16000,
+        self,
+        *,
+        req_name: str,
+        system: str,
+        user: str,
+        output_schema: dict | None = None,
+        max_tokens: int = 16000,
     ) -> LlmResponse:
         # can persist the requests if you want to keep track of them
         chat_blocks = [
@@ -36,10 +36,14 @@ class LlmApi:
                 output_schema=output_schema,
                 max_tokens=max_tokens,
             )
-            result = LlmResponse(structured_output=output,)
+            result = LlmResponse(
+                structured_output=output,
+            )
             pass
         else:
-            completion = self.llm_client.chat_completion(chat_blocks, max_tokens=max_tokens)
+            completion = self.llm_client.chat_completion(
+                chat_blocks, max_tokens=max_tokens
+            )
             result = LlmResponse(message=completion.content)
             pass
         return result

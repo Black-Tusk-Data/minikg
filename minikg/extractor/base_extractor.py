@@ -83,10 +83,13 @@ class BaseExtractor(Generic[T], abc.ABC):
                         "description": "Extractions derived from text",
                     },
                 },
-            }            
+            },
         )
         assert res.structured_output
-        return [response_type.model_validate(row) for row in res.structured_output["extractions"]]
+        return [
+            response_type.model_validate(row)
+            for row in res.structured_output["extractions"]
+        ]
 
     def _post_process(self, extractions: list[T]) -> list[T]:
         return extractions

@@ -6,13 +6,13 @@ from minikg.build_output import BuildStepOutput_Communities
 
 
 def get_community_summary_compute_order(
-        communities_output: BuildStepOutput_Communities,
+    communities_output: BuildStepOutput_Communities,
 ) -> list[list[str]]:
     """
     Return a list of 'stages', the idea being that each stage depends on the previous stages,
     but can be computed entirely in parallel.
     """
-    MAX_ROUNDS = 100            # to avoid infinite looping
+    MAX_ROUNDS = 100  # to avoid infinite looping
 
     # first layer communities only have nodes as children
     stages: list[list[str]] = [[]]
@@ -34,7 +34,10 @@ def get_community_summary_compute_order(
         stages.append([])
         for i in range(len(to_summarize)):
             community = to_summarize.popleft()
-            if all(com_id in available_summaries for com_id in community.child_community_ids):
+            if all(
+                com_id in available_summaries
+                for com_id in community.child_community_ids
+            ):
                 # it's computable
                 stages[-1].append(community.id)
                 pass

@@ -10,9 +10,9 @@ T = TypeVar("T", bound=MiniKgBuilderStep)
 
 class StepCoordinator(abc.ABC, Generic[T]):
     def __init__(
-            self,
-            *,
-            config: MiniKgConfig,
+        self,
+        *,
+        config: MiniKgConfig,
     ):
         self.config = config
         return
@@ -30,9 +30,9 @@ class StepCoordinator(abc.ABC, Generic[T]):
         pass
 
     def iterate_on_steps(
-            self,
-            executed_steps_this_coordinator: list[T],
-            **kwargs,
+        self,
+        executed_steps_this_coordinator: list[T],
+        **kwargs,
     ) -> list[T]:
         return []
 

@@ -14,10 +14,10 @@ class StepCoordinator_ExtractChunkLevelKgs(StepCoordinator):
         return Step_ExtractChunkKg
 
     def get_steps_to_execute(
-            self,
-            *,
-            steps_SplitDoc: list[Step_SplitDoc],
-            **kwargs,
+        self,
+        *,
+        steps_SplitDoc: list[Step_SplitDoc],
+        **kwargs,
     ) -> list[Step_ExtractChunkKg]:
         return [
             Step_ExtractChunkKg(self.config, fragment=fragment)

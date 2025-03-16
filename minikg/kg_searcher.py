@@ -171,9 +171,7 @@ class KgCommunitiesSearcher:
                 user=query,
             ).message
 
-            if not self.check_answer_is_relevant(
-                query=query, answer=community_answer
-            ):
+            if not self.check_answer_is_relevant(query=query, answer=community_answer):
                 logging.debug("community %s answer deemed irrelevant", community_name)
                 continue
 

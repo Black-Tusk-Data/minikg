@@ -7,7 +7,10 @@ from minikg.build_output import (
     BuildStepOutput_CommunitySummary,
     BuildStepOutput_Graph,
 )
-from minikg.utils import get_prompt_context_lines_for_community_summary, get_prompt_context_lines_for_graph
+from minikg.utils import (
+    get_prompt_context_lines_for_community_summary,
+    get_prompt_context_lines_for_graph,
+)
 
 
 class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_CommunitySummary]):
@@ -51,12 +54,14 @@ class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_CommunitySummary
         for name, prompt in self.attribute_prompts.items():
             summary = services.llm_api.completion(
                 req_name="summarize-community",
-                system=" ".join ([
-                    f"You are a {self.config.knowledge_domain} expert.",
-                    "Your task is to extract information from a provided knowledge graph.",
-                    "Refer ONLY to information from the knowledge graph in your responses.",
-                    prompt,
-                ]),
+                system=" ".join(
+                    [
+                        f"You are a {self.config.knowledge_domain} expert.",
+                        "Your task is to extract information from a provided knowledge graph.",
+                        "Refer ONLY to information from the knowledge graph in your responses.",
+                        prompt,
+                    ]
+                ),
                 user=prompt_context,
             )
             summary_data[name] = summary.message

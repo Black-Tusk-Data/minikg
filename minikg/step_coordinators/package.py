@@ -24,13 +24,13 @@ class StepCoordinator_Package(StepCoordinator):
         return Step_Package
 
     def get_steps_to_execute(
-            self,
-            *,
-            steps_CompressRedundantEdges: list[Step_CompressRedundantEdges],
-            steps_DefineCommunities: list[Step_DefineCommunities],
-            steps_IndexCommunity: list[Step_IndexCommunity],
-            steps_SummarizeCommunity: list[Step_SummarizeCommunity],
-            **kwargs,
+        self,
+        *,
+        steps_CompressRedundantEdges: list[Step_CompressRedundantEdges],
+        steps_DefineCommunities: list[Step_DefineCommunities],
+        steps_IndexCommunity: list[Step_IndexCommunity],
+        steps_SummarizeCommunity: list[Step_SummarizeCommunity],
+        **kwargs,
     ) -> list[Step_Package]:
         assert len(steps_CompressRedundantEdges) == 1
         return [
@@ -38,8 +38,13 @@ class StepCoordinator_Package(StepCoordinator):
                 self.config,
                 master_graph=steps_CompressRedundantEdges[0].output,
                 communities=steps_DefineCommunities[0].output,
-                community_indexes=[step.output for step in steps_IndexCommunity if step.output],
-                communitiy_summaries=[step.output for step in steps_SummarizeCommunity if step.output],
+                community_indexes=[
+                    step.output for step in steps_IndexCommunity if step.output
+                ],
+                communitiy_summaries=[
+                    step.output for step in steps_SummarizeCommunity if step.output
+                ],
             )
         ]
+
     pass

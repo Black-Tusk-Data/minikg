@@ -7,7 +7,11 @@ from pathlib import Path
 import re
 from typing import Generic, TypeVar
 
-from minikg.build_output import BuildStepOutput_CommunitySummary, BuildStepOutput_Package, MiniKgBuildPlanStepOutput
+from minikg.build_output import (
+    BuildStepOutput_CommunitySummary,
+    BuildStepOutput_Package,
+    MiniKgBuildPlanStepOutput,
+)
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.build_steps.step_compress_kg_edges import Step_CompressRedundantEdges
 from minikg.build_steps.step_define_communities import Step_DefineCommunities
@@ -19,19 +23,26 @@ from minikg.build_steps.step_split_doc import Step_SplitDoc
 from minikg.build_steps.step_summarize_community import Step_SummarizeCommunity
 from minikg.graph_edge_compressor import GraphEdgeCompressor
 from minikg.graph_semantic_db import GraphSemanticDb
-from minikg.graphtools.community_detection import CommunityDetector, CommunityDetectorLeiden, CommunityDetectorLouvain
+from minikg.graphtools.community_detection import (
+    CommunityDetector,
+    CommunityDetectorLeiden,
+    CommunityDetectorLouvain,
+)
 from minikg.graphtools.community_summaries import get_community_summary_compute_order
 from minikg.kg_searcher import KgCommunitiesSearcher
 from minikg.models import Community, MiniKgConfig
 from minikg.step_coordinators import STEP_COORDINATOR_ORDER
-from minikg.step_coordinators.extract_chunk_level_kgs import StepCoordinator_ExtractChunkLevelKgs
-from minikg.step_coordinators.merge_chunk_level_kgs import StepCoordinator_MergeChunkLevelKgs
+from minikg.step_coordinators.extract_chunk_level_kgs import (
+    StepCoordinator_ExtractChunkLevelKgs,
+)
+from minikg.step_coordinators.merge_chunk_level_kgs import (
+    StepCoordinator_MergeChunkLevelKgs,
+)
 from minikg.step_coordinators.split_docs import StepCoordinator_SplitDocs
 from minikg.step_executor import StepExecutor
 
 
 class Api:
-
 
     def __init__(
         self,
@@ -60,14 +71,12 @@ class Api:
 
     def build_kg(self) -> None:
         step_coordinators = [
-            coordinator(self.config)
-            for coordinator in STEP_COORDINATOR_ORDER
+            coordinator(self.config) for coordinator in STEP_COORDINATOR_ORDER
         ]
         self.executor.run_all_coordinators(step_coordinators)
 
         # # generally useful
         # master_graph_output = compress_step.output
-
 
         # kind of generally useful
         communities_by_id: dict[str, Community] = {}
@@ -78,17 +87,20 @@ class Api:
         # SUMMARIZE
         summaries_by_id: dict[str, BuildStepOutput_CommunitySummary] = {}
         if self.config.summary_prompts:
-            summary_compute_order: list[list[str]] = get_community_summary_compute_order(
-                define_communities_step.output
+            summary_compute_order: list[list[str]] = (
+                get_community_summary_compute_order(define_communities_step.output)
             )
             for stage in summary_compute_order:
-                stage_summary_steps = [Step_SummarizeCommunity(
-                    self.config,
-                    attribute_prompts=self.config.summary_prompts,
-                    community=communities_by_id[community_id],
-                    community_summaries=summaries_by_id,
-                    graph_output=master_graph_output,
-                ) for community_id in stage]
+                stage_summary_steps = [
+                    Step_SummarizeCommunity(
+                        self.config,
+                        attribute_prompts=self.config.summary_prompts,
+                        community=communities_by_id[community_id],
+                        community_summaries=summaries_by_id,
+                        graph_output=master_graph_output,
+                    )
+                    for community_id in stage
+                ]
                 stage_summary_steps = self.executor.execute_all(stage_summary_steps)
                 for community_id, step in zip(stage, stage_summary_steps):
                     assert step.output
@@ -107,7 +119,9 @@ class Api:
                     master_graph=compress_step.output,
                     community=community,
                 )
-                for i, community in enumerate(define_communities_step.output.communities)
+                for i, community in enumerate(
+                    define_communities_step.output.communities
+                )
             ]
             index_community_steps = self.executor.execute_all(index_community_steps)
             pass
@@ -121,7 +135,9 @@ class Api:
                     self.config,
                     master_graph=compress_step.output,
                     communities=define_communities_step.output,
-                    community_indexes=[step.output for step in index_community_steps if step.output],
+                    community_indexes=[
+                        step.output for step in index_community_steps if step.output
+                    ],
                 )
             ]
         )[0]

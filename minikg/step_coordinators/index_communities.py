@@ -16,10 +16,10 @@ class StepCoordinator_IndexCommunity(StepCoordinator):
         return Step_IndexCommunity
 
     def get_steps_to_execute(
-            self,
-            *,
-            steps_DefineCommunities: list[Step_DefineCommunities],
-            **kwargs,
+        self,
+        *,
+        steps_DefineCommunities: list[Step_DefineCommunities],
+        **kwargs,
     ) -> list[Step_IndexCommunity]:
         if not self.config.index_graph:
             return []
@@ -33,4 +33,5 @@ class StepCoordinator_IndexCommunity(StepCoordinator):
             )
             for i, community in enumerate(step_DefineCommunities.output.communities)
         ]
+
     pass

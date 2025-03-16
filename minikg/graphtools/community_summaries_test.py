@@ -29,9 +29,12 @@ class Test_get_community_summary_compute_order(unittest.TestCase):
                 ]
             )
         )
-        self.assertEqual(order, [
-            ["1", "2", "3"],
-        ])
+        self.assertEqual(
+            order,
+            [
+                ["1", "2", "3"],
+            ],
+        )
         return
 
     def test_two_phases(self):
@@ -53,7 +56,6 @@ class Test_get_community_summary_compute_order(unittest.TestCase):
                         child_community_ids=[],
                         child_node_ids=["node5", "node6"],
                     ),
-
                     Community(
                         id="4",
                         child_community_ids=["1", "2"],
@@ -67,10 +69,13 @@ class Test_get_community_summary_compute_order(unittest.TestCase):
                 ]
             )
         )
-        self.assertEqual(order, [
-            ["1", "2", "3"],
-            ["4", "5"],
-        ])
+        self.assertEqual(
+            order,
+            [
+                ["1", "2", "3"],
+                ["4", "5"],
+            ],
+        )
         return
 
     def test_three_phases(self):
@@ -92,7 +97,6 @@ class Test_get_community_summary_compute_order(unittest.TestCase):
                         child_community_ids=[],
                         child_node_ids=["node5", "node6"],
                     ),
-
                     Community(
                         id="4",
                         child_community_ids=["1", "2"],
@@ -111,13 +115,18 @@ class Test_get_community_summary_compute_order(unittest.TestCase):
                 ]
             )
         )
-        self.assertEqual(order, [
-            ["1", "2", "3"],
-            ["4", "5"],
-            ["6"],
-        ])
+        self.assertEqual(
+            order,
+            [
+                ["1", "2", "3"],
+                ["4", "5"],
+                ["6"],
+            ],
+        )
         return
+
     pass
+
 
 if __name__ == "__main__":
     unittest.main()

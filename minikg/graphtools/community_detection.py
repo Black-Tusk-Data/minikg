@@ -27,6 +27,7 @@ class CommunityDetectorLouvain(CommunityDetector):
             )
             for i, node_ids in enumerate(community_ids)
         ]
+
     pass
 
 
@@ -65,24 +66,27 @@ class CommunityDetectorLeiden(CommunityDetector):
                 continue
 
             child_clusters = [
-                row2
-                for row2 in hierarchy_rows
-                if row2.parent_cluster == row.cluster
+                row2 for row2 in hierarchy_rows if row2.parent_cluster == row.cluster
             ]
 
             communities_by_id[community_id] = Community(
                 id=community_id,
-                child_community_ids=list(set(
-                    cluster.cluster
-                    for cluster in child_clusters
-                    if not cluster.is_final_cluster
-                )),
-                child_node_ids=list(set(
-                    cluster.cluster
-                    for cluster in child_clusters
-                    if cluster.is_final_cluster
-                )),
+                child_community_ids=list(
+                    set(
+                        cluster.cluster
+                        for cluster in child_clusters
+                        if not cluster.is_final_cluster
+                    )
+                ),
+                child_node_ids=list(
+                    set(
+                        cluster.cluster
+                        for cluster in child_clusters
+                        if cluster.is_final_cluster
+                    )
+                ),
             )
             pass
         return list(communities_by_id.values())
+
     pass

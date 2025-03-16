@@ -14,16 +14,17 @@ class StepCoordinator_MergeChunkLevelKgs(StepCoordinator):
         return Step_MergeKgs
 
     def get_steps_to_execute(
-            self,
-            *,
-            steps_ExtractChunkKg: list[Step_ExtractChunkKg],
-            **kwargs,
+        self,
+        *,
+        steps_ExtractChunkKg: list[Step_ExtractChunkKg],
+        **kwargs,
     ) -> list[Step_MergeKgs]:
-        graphs_to_merge = [
-            step.output for step in steps_ExtractChunkKg
+        graphs_to_merge = [step.output for step in steps_ExtractChunkKg]
+        return [
+            Step_MergeKgs(
+                self.config,
+                graphs=graphs_to_merge,
+            )
         ]
-        return [Step_MergeKgs(
-            self.config,
-            graphs=graphs_to_merge,
-        )]
+
     pass

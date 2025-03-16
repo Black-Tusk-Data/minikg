@@ -15,13 +15,17 @@ class StepCoordinator_CompressRedundantEdges(StepCoordinator):
         return Step_CompressRedundantEdges
 
     def get_steps_to_execute(
-            self,
-            *,
-            steps_MergeKgs: list[Step_MergeKgs],
-            **kwargs,
+        self,
+        *,
+        steps_MergeKgs: list[Step_MergeKgs],
+        **kwargs,
     ) -> list[Step_CompressRedundantEdges]:
-        return [Step_CompressRedundantEdges(
-            self.config,
-            graph=step.output,
-        ) for step in steps_MergeKgs]
+        return [
+            Step_CompressRedundantEdges(
+                self.config,
+                graph=step.output,
+            )
+            for step in steps_MergeKgs
+        ]
+
     pass

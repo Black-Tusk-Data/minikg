@@ -125,9 +125,9 @@ class BuildStepOutput_Text(MiniKgBuildPlanStepOutput):
 
 class BuildStepOutput_CommunitySummary(MiniKgBuildPlanStepOutput):
     def __init__(
-            self,
-            *,
-            data: dict[str, str],
+        self,
+        *,
+        data: dict[str, str],
     ):
         self.data = data
         return
@@ -155,10 +155,7 @@ class BuildStepOutput_Communities(MiniKgBuildPlanStepOutput):
 
     def to_file(self, path: Path) -> None:
         with open(path, "w") as f:
-            f.write(json.dumps([
-                com.model_dump()
-                for com in self.communities
-            ]))
+            f.write(json.dumps([com.model_dump() for com in self.communities]))
             pass
         return
 
@@ -166,10 +163,7 @@ class BuildStepOutput_Communities(MiniKgBuildPlanStepOutput):
     def from_file(cls, path: Path) -> "BuildStepOutput_Communities":
         communities: list[Community]
         with open(path, "r") as f:
-            communities = [
-                Community.model_validate(r)
-                for r in json.load(f)
-            ]
+            communities = [Community.model_validate(r) for r in json.load(f)]
             pass
         return cls(
             communities,

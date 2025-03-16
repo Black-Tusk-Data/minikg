@@ -29,9 +29,7 @@ def get_prompt_context_lines_for_graph(G: nx.Graph) -> list[str]:
 
 
 def get_prompt_context_lines_for_community_summary(
-        *,
-        community_id: str,
-        summary_output: BuildStepOutput_CommunitySummary
+    *, community_id: str, summary_output: BuildStepOutput_CommunitySummary
 ) -> list[str]:
     lines: list[str] = [f"Community {community_id}"]
     for attr, summary in summary_output.data.items():
