@@ -66,6 +66,11 @@ class StepCoordinator_SummarizeCommunities(StepCoordinator):
         if not self.summary_compute_order:
             return []
 
+        for step in executed_steps_this_coordinator:
+            assert step.output  # typing
+            self.summaries_by_id[step.community.id] = step.output
+            pass
+
         stage = self.summary_compute_order.popleft()
         return [Step_SummarizeCommunity(
             self.config,
