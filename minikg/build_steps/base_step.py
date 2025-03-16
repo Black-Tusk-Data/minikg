@@ -105,3 +105,9 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
         return loaded
 
     pass
+
+
+# # an experiment...
+# class MiniKgBuilderExecutedStep(Generic[T], MiniKgBuilderStep[T], abc.ABC):
+#     output: T
+#     pass

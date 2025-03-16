@@ -49,7 +49,7 @@ class StepExecutor:
             return completed_steps
         pass
 
-    def run_all_coordinators(self, coordinators: list[StepCoordinator]):
+    def run_all_coordinators(self, coordinators: list[StepCoordinator]) -> None:
         executed_steps: dict[type[MiniKgBuilderStep], list[MiniKgBuilderStep]] = {}
         for coordinator in coordinators:
             # required_step_types = coordinator.get_required_step_types()

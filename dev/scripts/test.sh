@@ -1,6 +1,12 @@
 #!/bin/bash
 
+
+
 dotest() {
+    export DEBUG="1"
+    export JINA_AI_API_KEY="-"
+    export OPENAI_API_KEY="-"
+
     testfile=${1}
     echo "------ TEST ${testfile}"
     python -m unittest "${testfile}"

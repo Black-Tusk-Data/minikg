@@ -1,3 +1,7 @@
+from minikg.prompt_context import (
+    get_prompt_context_lines_for_community_summary,
+    get_prompt_context_lines_for_graph,
+)
 from minikg.services import services
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graph_merger import GraphMerger
@@ -6,10 +10,6 @@ from minikg.build_output import (
     BuildStepOutput_BaseGraph,
     BuildStepOutput_CommunitySummary,
     BuildStepOutput_Graph,
-)
-from minikg.utils import (
-    get_prompt_context_lines_for_community_summary,
-    get_prompt_context_lines_for_graph,
 )
 
 
