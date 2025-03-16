@@ -156,6 +156,87 @@ class Test_StepExecutor(unittest.TestCase):
         )
         return
 
+    def test_recursive_coordinator(self):
+        class StepCoordinator_Test1(StepCoordinator):
+            def get_required_step_types(self):
+                return []
+
+            def get_step_type(self):
+                return Step_Test1
+
+            def get_steps_to_execute(self, **kwargs):
+                return [
+                    Step_Test1("1"),
+                    Step_Test1("2"),
+                    Step_Test1("3"),
+                ]
+
+            pass
+
+        class StepCoordinator_Step2Recursive(StepCoordinator):
+            def get_required_step_types(self):
+                return [Step_Test1]
+
+            def get_step_type(self):
+                return Step_Test2
+
+            def get_steps_to_execute(
+                self,
+                steps_Test1: list[Step_Test1],
+                **kwargs,
+            ):
+                labels = [step.output.text.split(":")[-1] for step in steps_Test1]
+                return [Step_Test2(label) for label in labels]
+
+            def iterate_on_steps(
+                self,
+                steps_Test1: list[Step_Test1],
+                executed_steps_this_coordinator: list[Step_Test2],
+            ):
+                if len(executed_steps_this_coordinator) >= 12:
+                    return []
+                labels = [
+                    step.output.text.split(":")[-1]
+                    for step in executed_steps_this_coordinator
+                ]
+                next_round_labels = [str(int(label) * 2) for label in labels]
+                return [Step_Test2(label) for label in next_round_labels]
+
+            pass
+
+        se = StepExecutor(config)
+        se.run_all_coordinators(
+            [
+                StepCoordinator_Test1(config=config),
+                StepCoordinator_Step2Recursive(config=config),
+            ]
+        )
+
+        self.assertEqual(
+            EXECUTED_STEPS,
+            [
+                "Step_Test1:1",
+                "Step_Test1:2",
+                "Step_Test1:3",
+                # first round is based off just step 1
+                "Step_Test2:1",
+                "Step_Test2:2",
+                "Step_Test2:3",
+                # next round is based off just last step 2s
+                "Step_Test2:2",
+                "Step_Test2:4",
+                "Step_Test2:6",
+                # next round is based off all the previous step 2s
+                "Step_Test2:2",
+                "Step_Test2:4",
+                "Step_Test2:6",
+                "Step_Test2:4",
+                "Step_Test2:8",
+                "Step_Test2:12",
+            ],
+        )
+        return
+
     pass
 
 
