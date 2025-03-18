@@ -23,6 +23,7 @@ def get_prompt_context_lines_for_graph(G: nx.Graph) -> list[str]:
                 pass
             pass
         lines.append("")
+        node_sections.append("\n".join(lines))
         pass
 
     return node_sections

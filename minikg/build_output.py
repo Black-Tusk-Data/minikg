@@ -139,10 +139,10 @@ class BuildStepOutput_CommunitySummary(MiniKgBuildPlanStepOutput):
         return
 
     @classmethod
-    def from_file(cls, path: Path) -> "BuildStepOutput_Dict":
+    def from_file(cls, path: Path) -> "BuildStepOutput_CommunitySummary":
         data: dict
         with open(path, "r") as f:
-            return BuildStepOutput_Dict(data=json.load(f))
+            return BuildStepOutput_CommunitySummary(data=json.load(f))
 
     pass
 

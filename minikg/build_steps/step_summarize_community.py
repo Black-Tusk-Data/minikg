@@ -64,7 +64,7 @@ class Step_SummarizeCommunity(MiniKgBuilderStep[BuildStepOutput_CommunitySummary
                 ),
                 user=prompt_context,
             )
-            summary_data[name] = summary.message
+            summary_data[name] = summary.message or ""
             pass
 
         return BuildStepOutput_CommunitySummary(data=summary_data)

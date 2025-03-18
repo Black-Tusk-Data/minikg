@@ -23,6 +23,11 @@
  - [ ] iss-7
    - figure out why edge 'description' s are disappearing
    - pretty sure just need to use 'G.get_edge_data'
+ - [ ] iss-8
+   - split up node / edge identification and description into distinct phases:
+     - identification: just identify the nodes and edges (maybe using a working 'description' to help the merges)
+     - topo sort
+     - summarize using dependencies
 
 * next steps
  - once you have communities with structure,
