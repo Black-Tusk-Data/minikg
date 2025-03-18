@@ -2,8 +2,6 @@ import logging
 from pathlib import Path
 from typing import Type
 
-import networkx as nx
-
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.graphtools.community_detection import CommunityDetector
 from minikg.graphtools.flatten import flatten_multigraph
@@ -36,7 +34,8 @@ class Step_DefineCommunities(MiniKgBuilderStep[BuildStepOutput_Communities]):
         return BuildStepOutput_Communities
 
     def _execute(self) -> BuildStepOutput_Communities:
-        communities: list[set[str]] = nx.community.louvain_communities(self.graph.G)
-        return BuildStepOutput_Communities(self.community_detector.get_communities())
+        return BuildStepOutput_Communities(
+            self.community_detector.get_communities(self.graph.G)
+        )
 
     pass

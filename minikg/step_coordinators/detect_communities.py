@@ -33,7 +33,8 @@ class StepCoordinator_DetectCommunities(StepCoordinator):
     ) -> list[Step_CompressRedundantEdges]:
         community_detection_algo = self._get_community_detection_algorithm()
         logging.info(
-            "using community detection algo %s", community_detection_algo.__name__
+            "using community detection algo %s",
+            community_detection_algo.__class__.__name__,
         )
         return [
             Step_DefineCommunities(

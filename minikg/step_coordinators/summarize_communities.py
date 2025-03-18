@@ -60,8 +60,10 @@ class StepCoordinator_SummarizeCommunities(StepCoordinator):
     def iterate_on_steps(
         self, executed_steps_this_coordinator: list[Step_SummarizeCommunity], **kwargs
     ) -> list[Step_SummarizeCommunity]:
-        assert self.config.summary_prompts  # typing
         assert self.step_DefineCommunities
+
+        if not self.config.summary_prompts:
+            return []
         if not self.summary_compute_order:
             return []
 

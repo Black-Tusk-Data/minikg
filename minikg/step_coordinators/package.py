@@ -41,9 +41,11 @@ class StepCoordinator_Package(StepCoordinator):
                 community_indexes=[
                     step.output for step in steps_IndexCommunity if step.output
                 ],
-                communitiy_summaries=[
-                    step.output for step in steps_SummarizeCommunity if step.output
-                ],
+                summaries_by_id={
+                    step.community.id: step.output
+                    for step in steps_SummarizeCommunity
+                    if step.output
+                },
             )
         ]
 

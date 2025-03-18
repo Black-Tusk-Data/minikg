@@ -71,7 +71,7 @@ class Api:
 
     def build_kg(self) -> None:
         step_coordinators = [
-            coordinator(self.config) for coordinator in STEP_COORDINATOR_ORDER
+            coordinator(config=self.config) for coordinator in STEP_COORDINATOR_ORDER
         ]
         self.executor.run_all_coordinators(step_coordinators)
         return
