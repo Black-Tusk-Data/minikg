@@ -47,6 +47,7 @@ class Step_ExtractChunkKg(MiniKgBuilderStep[BuildStepOutput_Graph]):
                 entity.name,
                 entity_type=entity.entity_type,
                 description=entity.description,
+                fragment=self.fragment.model_dump(),
             )
             pass
         for relationship in entity_relationships:

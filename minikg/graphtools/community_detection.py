@@ -80,7 +80,7 @@ class CommunityDetectorLeiden(CommunityDetector):
                 ),
                 child_node_ids=list(
                     set(
-                        str(cluster.cluster)
+                        str(cluster.node)
                         for cluster in child_clusters
                         if cluster.is_final_cluster
                     )

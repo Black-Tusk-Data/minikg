@@ -1,3 +1,5 @@
+import logging
+
 import networkx as nx
 
 
@@ -11,6 +13,9 @@ def get_prompt_context_lines_for_graph(G: nx.Graph) -> list[str]:
     node_sections: list[str] = []
     for node_id in G.nodes:
         node_data = G.nodes[node_id]
+        if not node_data:
+            logging.error("empty node data for node %s", node_id)
+            continue
         lines = [
             " ".join([node_data["entity_type"], node_id]),
             node_data["description"],

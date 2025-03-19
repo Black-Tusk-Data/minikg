@@ -34,6 +34,7 @@ class MiniKgConfig(NamedTuple):
     community_search_concurrency: int = 20
     community_algorithm: str = "louvain"
     document_desc: str = "document"
+    force_uppercase_node_names: bool = False
     ignore_expressions: list[str] | None = None
     index_graph: bool = True
     embedding_size: int = 1024

@@ -9,9 +9,10 @@ class EntityExtractor(BaseExtractor[Entity]):
         return Entity
 
     def _post_process(self, extractions: list[Entity]) -> list[Entity]:
-        # could group these if they are too similar
-        for entity in extractions:
-            entity.name = entity.name.upper()
+        if self.config.force_uppercase_node_names:
+            for entity in extractions:
+                entity.name = entity.name.upper()
+                pass
             pass
         return extractions
 
