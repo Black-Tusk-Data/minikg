@@ -1,6 +1,9 @@
+from fnmatch import fnmatch
 import logging
 from pathlib import Path
 import re
+
+from pydantic import config
 
 from minikg.build_steps.base_step import MiniKgBuilderStep
 from minikg.build_steps.step_split_doc import Step_SplitDoc
@@ -10,11 +13,15 @@ from minikg.step_coordinators.base import StepCoordinator
 class StepCoordinator_SplitDocs(StepCoordinator):
     def _gather_input_files(self) -> list[Path]:
         # this can be its own step, where we check with the LLM if it's a code file or not
-        ignore_expressions = [re.compile(rf"{self.config.input_dir}/\.git/?")]
+        ignore_expressions = [
+            "**/.git",
+            *(self.config.ignore_expressions or []),
+            # re.compile(rf"{self.config.input_dir}/\.git/?")
+        ]
         return [
             path
             for path in self.config.input_dir.rglob(self.config.input_file_exp)
-            if not any(expr.search(str(path)) for expr in ignore_expressions)
+            if not any(fnmatch(str(path), expr) for expr in ignore_expressions)
             and path.is_file()
         ]
 

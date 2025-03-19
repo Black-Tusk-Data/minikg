@@ -73,14 +73,14 @@ class CommunityDetectorLeiden(CommunityDetector):
                 id=community_id,
                 child_community_ids=list(
                     set(
-                        cluster.cluster
+                        str(cluster.cluster)
                         for cluster in child_clusters
                         if not cluster.is_final_cluster
                     )
                 ),
                 child_node_ids=list(
                     set(
-                        cluster.cluster
+                        str(cluster.cluster)
                         for cluster in child_clusters
                         if cluster.is_final_cluster
                     )

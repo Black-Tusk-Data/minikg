@@ -52,7 +52,6 @@ class StepExecutor:
     def run_all_coordinators(self, coordinators: list[StepCoordinator]) -> None:
         executed_steps: dict[type[MiniKgBuilderStep], list[MiniKgBuilderStep]] = {}
         for coordinator in coordinators:
-            # required_step_types = coordinator.get_required_step_types()
             step_kwargs = {}
             for required_step_type in coordinator.get_required_step_types():
                 if required_step_type not in executed_steps:
@@ -65,6 +64,7 @@ class StepExecutor:
                 _, step_name = required_step_type.__name__.split("Step_", 1)
                 step_kwargs[f"steps_{step_name}"] = executed_steps[required_step_type]
                 pass
+            logging.info("running coordinator %s", coordinator.__class__.__name__)
             coordinator_steps = coordinator.get_steps_to_execute(**step_kwargs)
             coordinator_steps = self._execute_all_steps(coordinator_steps)
             step_type = coordinator.get_step_type()

@@ -34,6 +34,7 @@ class MiniKgConfig(NamedTuple):
     community_search_concurrency: int = 20
     community_algorithm: str = "louvain"
     document_desc: str = "document"
+    ignore_expressions: list[str] | None = None
     index_graph: bool = True
     embedding_size: int = 1024
     embedding_model: str = "jina-embeddings-v3"
