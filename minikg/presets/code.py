@@ -13,6 +13,7 @@ class KgApiCode:
     def __init__(
             self,
             *,
+            cache_dir: str,
             ignore_file_exps: list[str],
             input_file_exps: list[str],
             github_url: str = "",
@@ -61,7 +62,7 @@ class KgApiCode:
                 knowledge_domain="software code",
                 max_concurrency=8,
                 max_chunk_lines=300,
-                persist_dir=Path("./cache"),
+                persist_dir=Path(cache_dir),
                 role_desc="an expert software engineer",
                 summary_prompts={
                     "name": "Assign a name to the logical part of a software system that is defined by all sections of the provided context.  Your response should simply be the name of the subsystem.",
