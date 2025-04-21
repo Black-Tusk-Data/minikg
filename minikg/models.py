@@ -74,9 +74,9 @@ class CompletionShape(BaseModel):
 
     @classmethod
     def prompt_json_schema(
-            cls: type["CompletionShape"],
-            *,
-            description_overrides: dict[str, str] | None = None,
+        cls: type["CompletionShape"],
+        *,
+        description_overrides: dict[str, str] | None = None,
     ) -> dict:
         raw = cls.model_json_schema()
         if description_overrides:
@@ -92,9 +92,7 @@ class CompletionShape(BaseModel):
 class Entity(CompletionShape):
     entity_type: str = Field(description="Type of entity")  # override as enum
     description: str = Field(description="A short description of the entity")
-    name: str = Field(
-        description="A unique name for the entity"
-    )
+    name: str = Field(description="A unique name for the entity")
     pass
 
 

@@ -11,19 +11,18 @@ GITHUB_CLONE_TO_DIR = Path("./.github")
 
 class KgApiCode:
     def __init__(
-            self,
-            *,
-            ignore_file_exps: list[str],
-            input_file_exps: list[str],
-            github_url: str = "",
-            local_dir: str = "",
+        self,
+        *,
+        ignore_file_exps: list[str],
+        input_file_exps: list[str],
+        github_url: str = "",
+        local_dir: str = "",
     ):
         if not any([github_url, local_dir]):
             raise Exception("expected one of 'github_url' or 'local_dir'")
 
         self.input_dir = (
-            Path(local_dir) if local_dir
-            else self._clone_github_url(github_url)
+            Path(local_dir) if local_dir else self._clone_github_url(github_url)
         )
         self.project_name = os.path.split(self.input_dir.absolute())[-1]
 
@@ -79,9 +78,9 @@ class KgApiCode:
         if dest_path.exists():
             return dest_path
         os.makedirs(GITHUB_CLONE_TO_DIR, exist_ok=True)
-        subprocess.check_call([
-            "git", "clone", github_url, repo_name
-        ], cwd=GITHUB_CLONE_TO_DIR.absolute())
+        subprocess.check_call(
+            ["git", "clone", github_url, repo_name], cwd=GITHUB_CLONE_TO_DIR.absolute()
+        )
         return dest_path
 
     pass

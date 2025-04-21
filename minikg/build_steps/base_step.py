@@ -28,6 +28,7 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
         self.cache_bucket = None
         if config.s3_cache_bucket_name:
             from btdcore.aws.s3bucket import S3Bucket
+
             self.cache_bucket = S3Bucket(bucket_name=config.s3_cache_bucket_name)
         return
 
@@ -169,6 +170,7 @@ class MiniKgBuilderStep(Generic[T], abc.ABC):
             pass
         if config.s3_cache_bucket_name:
             from btdcore.aws.s3bucket import S3Bucket
+
             cache_bucket = S3Bucket(bucket_name=config.s3_cache_bucket_name)
             s3_key = "".join(
                 [

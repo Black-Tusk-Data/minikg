@@ -11,17 +11,20 @@ def get_all_input_files(config: MiniKgConfig) -> list[Path]:
         "**/.git",
         *(config.ignore_expressions or []),
     ]
-    return list(
-        set(
-            Path(
-                os.path.relpath(
-                    path,
-                    config.input_dir,
-                )
+    potential_paths = set(
+        Path(
+            os.path.relpath(
+                path,
+                config.input_dir,
             )
-            for exp in config.input_file_exps
-            for path in config.input_dir.rglob(exp)
-            if not any(fnmatch(str(path), expr) for expr in ignore_expressions)
-            and path.is_file()
         )
+        for exp in config.input_file_exps
+        for path in config.input_dir.rglob(exp)
+        if path.is_file()
     )
+
+    return [
+        path
+        for path in potential_paths
+        if not any(fnmatch(str(path), expr) for expr in ignore_expressions)
+    ]

@@ -37,9 +37,9 @@ class EntityExtractor(BaseExtractor[Entity], abc.ABC):
             description_overrides={
                 k: v
                 for k, v in [
-                        ("description", self.config.entity_description_desc),
-                        ("entity_type", self.config.entity_type_desc),
-                        ("name", self.config.entity_name_desc),
+                    ("description", self.config.entity_description_desc),
+                    ("entity_type", self.config.entity_type_desc),
+                    ("name", self.config.entity_name_desc),
                 ]
                 if v
             }
