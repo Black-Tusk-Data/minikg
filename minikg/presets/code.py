@@ -13,7 +13,6 @@ class KgApiCode:
     def __init__(
             self,
             *,
-            cache_dir: str,
             ignore_file_exps: list[str],
             input_file_exps: list[str],
             github_url: str = "",
@@ -26,6 +25,7 @@ class KgApiCode:
             Path(local_dir) if local_dir
             else self._clone_github_url(github_url)
         )
+        self.project_name = os.path.split(self.input_dir.absolute())[-1]
 
         self.minikgapi = MiniKgApi(
             config=MiniKgConfig(
@@ -62,7 +62,7 @@ class KgApiCode:
                 knowledge_domain="software code",
                 max_concurrency=8,
                 max_chunk_lines=300,
-                persist_dir=Path(cache_dir),
+                persist_dir=Path(f"./kgcache_{self.project_name}"),
                 role_desc="an expert software engineer",
                 summary_prompts={
                     "name": "Assign a name to the logical part of a software system that is defined by all sections of the provided context.  Your response should simply be the name of the subsystem.",
