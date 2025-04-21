@@ -15,9 +15,4 @@ setup(
             "py.typed",
         ],
     },
-    install_requires=[
-        "btdcore",
-        "expert-llm"
-    ],
-    scripts=["./bin/crushmycode"],
 )
