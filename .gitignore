@@ -4,3 +4,7 @@ input/
 cache/
 build/
 *.egg-info/
+
+.idea/
+.github/
+lib/

@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+
+import argparse
+import logging
+import os
+from pathlib import Path
+import subprocess
+
+from btdcore.logging import setup_logging
+
+setup_logging()
+
+from minikg.presets.code import KgApiCode, subprocess
+from minikg.models import Community, Group
+
+
+parser = argparse.ArgumentParser(
+    prog="Crush My Code",
+    description="Auto-generate knowledge graphs from codebases",
+)
+
+parser.add_argument("repo_url", type=str, help="""
+Local folder path or github URL.
+""")
+parser.add_argument("--input-files", nargs="*", help="""
+List of glob expressions that specify which source files should be considered.
+""")
+parser.add_argument("--ignore-files", nargs="*", help="""
+List of glob expressions that specify which source files should be ignored.
+These are applied only after some 'input_files' expression has matched.
+""")
+parser.add_argument("--show-nodes", action="store_true", help="""
+Whether or not to include code nodes themselves in the output graph.
+In big repositories this can be very noisy.
+""")
+
+
+MAX_WORDS_PER_LINE = 10
+
+def _format_title(text: str) -> str:
+    words = text.split(" ")
+    line_words = [
+        words[i:i+MAX_WORDS_PER_LINE]
+        for i in range(0, len(words), MAX_WORDS_PER_LINE)
+    ]
+    return "\n".join([
+        " ".join(words)
+        for words in line_words
+    ])
+
+
+def draw_community_tree(
+        *,
+        groups: dict[str, Group],
+        communities: dict[str, Community],
+        com_summaries: dict[str, dict[str, str]],
+        node_details_by_id: dict[str, dict[str, str]],
+        outfile_name: str,
+        include_nodes: bool = False,
+):
+    from pyvis.network import Network
+
+    net = Network()
+
+    # NODES
+    for group in groups.values():
+        net.add_node(
+            group.group_id,
+            label=group.summary["name"],
+            title=_format_title(group.summary["purpose"]),
+        )
+        pass
+
+    for community in communities.values():
+        net.add_node(
+            community.id,
+            label=com_summaries[community.id]["name"],
+            title=_format_title(com_summaries[community.id]["purpose"]),
+        )
+        if include_nodes:
+            for code_node_id in community.child_node_ids:
+                node_details = node_details_by_id[code_node_id]
+                net.add_node(
+                    code_node_id,
+                    title=_format_title("\n".join([
+                        node_details["entity_type"],
+                        node_details["description"],
+                    ])),
+                )
+                pass
+            pass
+        pass
+
+    # EDGES
+    for group in groups.values():
+        for child_group_id in group.child_group_ids:
+            net.add_edge(
+                group.group_id,
+                child_group_id,
+            )
+            pass
+        for child_com_id in group.child_community_ids:
+            net.add_edge(
+                group.group_id,
+                child_com_id,
+            )
+            pass
+        pass
+
+    for community in communities.values():
+        for child_com_id in community.child_community_ids:
+            net.add_edge(
+                community.id,
+                child_com_id,
+            )
+            pass
+        if include_nodes:
+            for child_node_id in community.child_node_ids:
+                net.add_edge(
+                    community.id,
+                    child_node_id,
+                )
+                pass
+            pass
+        pass
+
+    net.show(outfile_name, notebook=False)
+    pass
+
+
+def main():
+    args = parser.parse_args()
+    local_path = args.repo_url
+    github_url = ""
+    if not Path(local_path).exists():
+        github_url = local_path
+        local_path = ""
+        pass
+
+    api = KgApiCode(
+        ignore_file_exps=args.ignore_files or [],
+        input_file_exps=args.input_files or ["*"],
+        github_url=github_url,
+        local_dir=local_path,
+    )
+    proj_name = os.path.split(api.input_dir.absolute())[-1]
+    viz_fname = f"{proj_name}.html"
+
+    api.minikgapi.build_kg()
+    pkg = api.minikgapi._load_package()
+
+    logging.info("drawing code graph to '%s'", viz_fname)
+    draw_community_tree(
+        groups=pkg.cluster_groups,
+        communities=pkg.communities,
+        com_summaries=pkg.summaries_by_id,
+        node_details_by_id=dict(pkg.G.nodes),
+        outfile_name=viz_fname,
+        include_nodes=args.show_nodes,
+    )
+    subprocess.check_call([
+        "open", viz_fname,
+    ])
+    return
+
+
+if __name__ == '__main__':
+    main()

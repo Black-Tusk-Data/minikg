@@ -19,4 +19,5 @@ setup(
         "btdcore",
         "expert-llm"
     ],
+    scripts=["./bin/crushmycode"],
 )

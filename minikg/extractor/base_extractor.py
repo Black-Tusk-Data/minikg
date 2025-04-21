@@ -12,8 +12,8 @@ from expert_llm.remote.openai_shaped_client_implementations import (
 )
 from pydantic import Field, create_model, BaseModel
 
+from minikg.services import services
 from minikg.models import CompletionShape, FileFragment, MiniKgConfig
-
 
 T = TypeVar("T", bound=CompletionShape)
 
@@ -27,16 +27,6 @@ class BaseExtractor(Generic[T], abc.ABC):
     ):
         self.config = config
         self.fragment = fragment
-        # TODO: make this configurable
-        self.llm_client = OpenAIApiClient("gpt-4o")
-        # self.llm_client = TogetherAiClient("meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo")
-
-        # self.output_model = create_model(
-        #     f"Output-{self.__class__.__name__}",
-        #     extractions=(list[self._get_llm_extraction_item_shape()], Field(
-        #         description="Extractions from the text",
-        #     )),
-        # )
         return
 
     def _get_llm_extraction_item_shape(self) -> dict:
@@ -51,7 +41,7 @@ class BaseExtractor(Generic[T], abc.ABC):
         pass
 
     def _get_fragment_contents(self) -> str:
-        with open(self.fragment.source_path) as f:
+        with open(self.config.input_dir / self.fragment.source_path) as f:
             lines = f.readlines()
             text = "".join(
                 lines[self.fragment.start_line_incl : self.fragment.end_line_excl]
@@ -61,7 +51,7 @@ class BaseExtractor(Generic[T], abc.ABC):
 
     def _get_system_prompt_lines(self) -> list[str]:
         return [
-            f"You are a {self.config.knowledge_domain} expert.",
+            f"You are {self.config.role_desc}.",
         ]
 
     def _get_system_prompt(self) -> str:
@@ -74,18 +64,16 @@ class BaseExtractor(Generic[T], abc.ABC):
         system_prompt = self._get_system_prompt()
         user_prompt = self._get_user_prompt()
         response_type = self._get_llm_extraction_item_type()
-        # TODO: run this through a structured completion, the result of which is the list[S]
 
         extraction_item_shape = self._get_llm_extraction_item_shape()
 
-        res = self.llm_client.structured_completion_raw(
-            chat_blocks=[
-                ChatBlock(role="system", content=system_prompt),
-                ChatBlock(role="user", content=user_prompt),
-            ],
+        res = services.llm_api.completion(
+            req_name="extract",
+            system=system_prompt,
+            user=user_prompt,
             output_schema={
                 "type": "object",
-                "required": ["extractions"],
+                # "required": ["extractions"],
                 "properties": {
                     "extractions": {
                         "type": "array",
@@ -94,10 +82,12 @@ class BaseExtractor(Generic[T], abc.ABC):
                     },
                 },
             },
-            output_schema_name="Extractions",
-            max_tokens=16000,  # pretty much the max
         )
-        return [response_type.model_validate(row) for row in res["extractions"]]
+        assert res.structured_output
+        return [
+            response_type.model_validate(row)
+            for row in res.structured_output["extractions"]
+        ]
 
     def _post_process(self, extractions: list[T]) -> list[T]:
         return extractions

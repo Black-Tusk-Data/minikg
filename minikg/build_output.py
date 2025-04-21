@@ -9,22 +9,28 @@ from typing import Generic, Literal, NamedTuple, TypeVar
 import networkx as nx
 from pydantic import BaseModel, Field
 
-from minikg.graph_semantic_db import GraphSemanticDb
-from minikg.models import FileFragment, GraphType
+from minikg.models import (
+    Entity,
+    EntityRelationship,
+    EntityWithFragment,
+    FileFragment,
+    GraphType,
+    Community,
+    Group,
+)
 from minikg.utils import scrub_title_key
-
 
 GT = TypeVar("GT", bound=GraphType)
 
 
 class MiniKgBuildPlanStepOutput(abc.ABC):
     @abc.abstractmethod
-    def to_file(self, path: Path) -> None:
+    def to_bytes(self) -> bytes:
         pass
 
     @classmethod
     @abc.abstractmethod
-    def from_file(cls, path: Path) -> "MiniKgBuildPlanStepOutput":
+    def from_bytes(cls, raw: bytes) -> "MiniKgBuildPlanStepOutput":
         pass
 
     pass
@@ -41,7 +47,7 @@ class BuildStepOutput_BaseGraph(MiniKgBuildPlanStepOutput, Generic[GT], abc.ABC)
         self.G = G
         return
 
-    def to_file(self, path: Path) -> None:
+    def to_bytes(self) -> bytes:
         graph_bytes = pickle.dumps(self.G)
         json_data = json.dumps(
             {
@@ -49,18 +55,11 @@ class BuildStepOutput_BaseGraph(MiniKgBuildPlanStepOutput, Generic[GT], abc.ABC)
                 "graph_b64": base64.b64encode(graph_bytes).decode("utf-8"),
             }
         )
-        with open(path, "w") as f:
-            f.write(json_data)
-            pass
-        return
+        return json_data.encode("utf-8")
 
     @classmethod
-    def from_file(cls, path: Path) -> "BuildStepOutput_BaseGraph":
-        data: dict
-        with open(path, "r") as f:
-            data = json.loads(f.read())
-            pass
-
+    def from_bytes(cls, raw: bytes) -> "BuildStepOutput_BaseGraph":
+        data = json.loads(raw)
         graph_bytes = base64.b64decode(data["graph_b64"])
         graph = pickle.loads(graph_bytes)
         return cls(
@@ -84,21 +83,15 @@ class BuildStepOutput_Chunks(MiniKgBuildPlanStepOutput):
         self.chunks = chunks
         return
 
-    def to_file(self, path: Path) -> None:
-        with open(path, "w") as f:
-            f.write(
-                json.dumps({"chunks": [chunk.model_dump() for chunk in self.chunks]})
-            )
-            pass
-        return
+    def to_bytes(self) -> bytes:
+        dat = json.dumps({"chunks": [chunk.model_dump() for chunk in self.chunks]})
+        return dat.encode("utf-8")
 
     @classmethod
-    def from_file(cls, path: Path) -> "BuildStepOutput_Chunks":
-        data: dict
-        with open(path, "r") as f:
-            data = json.loads(f.read())
-            chunks = [FileFragment.model_validate(chunk) for chunk in data["chunks"]]
-            return BuildStepOutput_Chunks(chunks=chunks)
+    def from_bytes(cls, raw: bytes) -> "BuildStepOutput_Chunks":
+        data = json.loads(raw)
+        chunks = [FileFragment.model_validate(chunk) for chunk in data["chunks"]]
+        return BuildStepOutput_Chunks(chunks=chunks)
 
     pass
 
@@ -108,38 +101,68 @@ class BuildStepOutput_Text(MiniKgBuildPlanStepOutput):
         self.text = text
         return
 
-    def to_file(self, path: Path) -> None:
-        with open(path, "w") as f:
-            f.write(self.text)
-            pass
-        return
+    def to_bytes(self) -> bytes:
+        return self.text.encode("utf-8")
 
     @classmethod
-    def from_file(cls, path: Path) -> "BuildStepOutput_Text":
-        data: dict
-        with open(path, "r") as f:
-            return BuildStepOutput_Text(text=f.read().strip())
+    def from_bytes(cls, raw: bytes) -> "BuildStepOutput_Text":
+        return BuildStepOutput_Text(text=raw.decode("utf-8").strip())
 
     pass
 
 
+class BuildStepOutput_CommunitySummary(MiniKgBuildPlanStepOutput):
+    def __init__(
+        self,
+        *,
+        data: dict[str, str],
+    ):
+        self.data = data
+        return
+
+    def to_bytes(self) -> bytes:
+        return json.dumps(self.data).encode("utf-8")
+
+    @classmethod
+    def from_bytes(cls, raw: bytes) -> "BuildStepOutput_CommunitySummary":
+        return BuildStepOutput_CommunitySummary(data=json.loads(raw))
+
+    pass
+
+
+class BuildStepOutput_Groups(MiniKgBuildPlanStepOutput):
+    def __init__(self, *, groups: list[Group]):
+        self.groups = groups
+        return
+
+    def to_bytes(self) -> bytes:
+        return json.dumps(
+            {"groups": [group.model_dump() for group in self.groups]}
+        ).encode("utf-8")
+
+    @classmethod
+    def from_bytes(cls, raw: bytes) -> "BuildStepOutput_Groups":
+        return BuildStepOutput_Groups(
+            groups=[Group.model_validate(d) for d in json.loads(raw)["groups"]]
+        )
+
+    pass
+
+
+# would like to wrap in an obj and add a 'name' to each community
 class BuildStepOutput_Communities(MiniKgBuildPlanStepOutput):
-    def __init__(self, communities: list[list[str]]):
+    def __init__(self, communities: list[Community]):
         self.communities = communities
         return
 
-    def to_file(self, path: Path) -> None:
-        with open(path, "w") as f:
-            f.write(json.dumps(self.communities))
-            pass
-        return
+    def to_bytes(self) -> bytes:
+        return json.dumps([com.model_dump() for com in self.communities]).encode(
+            "utf-8"
+        )
 
     @classmethod
-    def from_file(cls, path: Path) -> "BuildStepOutput_Communities":
-        communities: list[list[str]]
-        with open(path, "r") as f:
-            communities = json.load(f)
-            pass
+    def from_bytes(cls, raw: bytes) -> "BuildStepOutput_Communities":
+        communities = [Community.model_validate(r) for r in json.loads(raw)]
         return cls(
             communities,
         )
@@ -147,40 +170,45 @@ class BuildStepOutput_Communities(MiniKgBuildPlanStepOutput):
     pass
 
 
-class BuildStepOutput_IndexedCommunity(MiniKgBuildPlanStepOutput):
-    def __init__(
-        self,
-        *,
-        semantic_db_name: str,
-    ):
-        self.semantic_db_name = semantic_db_name
+class BuildStepOutput_Edges(MiniKgBuildPlanStepOutput):
+    # Thinking about adding a 'problem files' member.
+    def __init__(self, *, edges: list[EntityRelationship]):
+        self.edges = edges
         return
 
-    def to_file(self, path: Path) -> None:
-        with open(path, "w") as f:
-            f.write(self.semantic_db_name)
-            pass
-        return
+    def to_bytes(self) -> bytes:
+        return json.dumps({"edges": [edge.model_dump() for edge in self.edges]}).encode(
+            "utf-8"
+        )
 
     @classmethod
-    def from_file(cls, path: Path) -> "BuildStepOutput_IndexedCommunity":
-        with open(path, "r") as f:
-            name = f.read().strip()
-            return cls(
-                semantic_db_name=name,
-            )
-        pass
+    def from_bytes(cls, raw: bytes) -> "BuildStepOutput_Edges":
+        data = json.loads(raw)
+        edges = [EntityRelationship.model_validate(entity) for entity in data["edges"]]
+        return BuildStepOutput_Edges(edges=edges)
 
     pass
 
 
-class BuildStepOutput_Vacuous(MiniKgBuildPlanStepOutput):
-    def to_file(self, path: Path) -> None:
+class BuildStepOutput_Entities(MiniKgBuildPlanStepOutput):
+    def __init__(self, *, entities: list[EntityWithFragment]):
+        self.entities = entities
         return
 
+    def to_bytes(self) -> bytes:
+        return json.dumps(
+            {"entities": [entity.model_dump() for entity in self.entities]}
+        ).encode("utf-8")
+
     @classmethod
-    def from_file(cls, path: Path) -> "BuildStepOutput_Vacuous":
-        return cls()
+    def from_bytes(cls, raw: bytes) -> "BuildStepOutput_Entities":
+        data = json.loads(raw)
+        entities = [
+            EntityWithFragment.model_validate(entity) for entity in data["entities"]
+        ]
+        return BuildStepOutput_Entities(
+            entities=entities,
+        )
 
     pass
 
@@ -190,41 +218,53 @@ class BuildStepOutput_Package(MiniKgBuildPlanStepOutput):
         self,
         *,
         G: nx.MultiGraph,  # or just 'Graph'
-        communities: list[list[str]],
+        communities: dict[str, Community],
         community_db_names: list[str],
+        community_hierarchy: list[list[str]],
+        summaries_by_id: dict[str, dict[str, str]],
+        cluster_groups: dict[str, Group],
     ):
         self.G = G
         self.communities = communities
         self.community_db_names = community_db_names
+        self.community_hierarchy = community_hierarchy
+        self.summaries_by_id = summaries_by_id
+        self.cluster_groups = cluster_groups
         return
 
-    def to_file(self, path: Path) -> None:
+    def to_bytes(self) -> bytes:
         graph_bytes = pickle.dumps(self.G)
         dat = {
             "graph_b64": base64.b64encode(graph_bytes).decode("utf-8"),
-            "communities": self.communities,
+            "communities": {
+                key: com.model_dump() for key, com in self.communities.items()
+            },
             "community_db_names": self.community_db_names,
+            "community_hierarchy": self.community_hierarchy,
+            "summaries_by_id": self.summaries_by_id,
+            "cluster_groups": {
+                key: group.model_dump() for key, group in self.cluster_groups.items()
+            },
         }
-        with open(path, "w") as f:
-            json.dump(dat, f)
-            pass
-        return
+        return json.dumps(dat).encode("utf-8")
 
     @classmethod
-    def from_file(cls, path: Path) -> "BuildStepOutput_Package":
-        with open(path, "r") as f:
-            dat = json.load(f)
-            graph_bytes = base64.b64decode(dat["graph_b64"])
-            graph = pickle.loads(graph_bytes)
-            return cls(
-                G=graph,
-                communities=dat["communities"],
-                community_db_names=dat["community_db_names"],
-            )
-        pass
-
-    # or, a 'from package' method on the searcher
-    def get_knowledge_base_searcher(self):
-        return
+    def from_bytes(cls, raw: bytes) -> "BuildStepOutput_Package":
+        dat = json.loads(raw)
+        graph_bytes = base64.b64decode(dat["graph_b64"])
+        graph = pickle.loads(graph_bytes)
+        return cls(
+            G=graph,
+            cluster_groups={
+                key: Group.model_validate(r) for key, r in dat["cluster_groups"].items()
+            },
+            communities={
+                key: Community.model_validate(r)
+                for key, r in dat["communities"].items()
+            },
+            community_db_names=dat["community_db_names"],
+            community_hierarchy=dat["community_hierarchy"],
+            summaries_by_id=dat["summaries_by_id"],
+        )
 
     pass

@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import numpy as np
 
 
@@ -14,6 +15,7 @@ def scrub_title_key(d: dict):
     return d
 
 
+# TODO: move this to a better home module
 def cluster_from_similarities(
     *,
     pairwise_similarities: np.ndarray,

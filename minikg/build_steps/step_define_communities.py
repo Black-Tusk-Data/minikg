@@ -1,10 +1,11 @@
+import logging
 from pathlib import Path
 from typing import Type
 
-import networkx as nx
-
 from minikg.build_steps.base_step import MiniKgBuilderStep
-from minikg.models import MiniKgConfig
+from minikg.graphtools.community_detection import CommunityDetector
+from minikg.graphtools.flatten import flatten_multigraph
+from minikg.models import Community, MiniKgConfig
 from minikg.build_output import (
     BuildStepOutput_Graph,
     BuildStepOutput_MultiGraph,
@@ -12,15 +13,17 @@ from minikg.build_output import (
 )
 
 
-class Step_DefineCommunitiesLouvain(MiniKgBuilderStep[BuildStepOutput_Communities]):
+class Step_DefineCommunities(MiniKgBuilderStep[BuildStepOutput_Communities]):
     def __init__(
         self,
         config: MiniKgConfig,
         *,
         graph: BuildStepOutput_MultiGraph,
+        community_detector: CommunityDetector,
     ) -> None:
         super().__init__(config)
         self.graph = graph
+        self.community_detector = community_detector
         return
 
     def get_id(self) -> str:
@@ -31,12 +34,8 @@ class Step_DefineCommunitiesLouvain(MiniKgBuilderStep[BuildStepOutput_Communitie
         return BuildStepOutput_Communities
 
     def _execute(self) -> BuildStepOutput_Communities:
-        communities: list[set[str]] = nx.community.louvain_communities(self.graph.G)
         return BuildStepOutput_Communities(
-            [list(community) for community in communities]
+            self.community_detector.get_communities(self.graph.G)
         )
 
     pass
-
-
-# TODO: Leiden algorithm

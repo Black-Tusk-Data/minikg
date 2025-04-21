@@ -1,0 +1,13 @@
+ - [ ] iss-3
+   - support passing in Leiden configuration
+ - [ ] idea-5
+   - in Leiden, when flattened graph, sum the number of multi-edges to
+     give a weight for each flattened edge
+ - [ ] iss-6
+   - ensure that the algorithm operates on disjoint components of the graph,
+     may need to iterate over the connected components in the community detection phase
+ - [ ] idea-8
+   - split up node / edge identification and description into distinct phases:
+     - identification: just identify the nodes and edges (maybe using a working 'description' to help the merges)
+     - topo sort
+     - summarize using dependencies

@@ -10,7 +10,6 @@ from expert_llm.remote.jina_ai_client import JinaAiClient
 
 from minikg.models import MiniKgConfig, Node, Edge
 
-
 DB_FNAME = "vectors.lancedb"
 
 

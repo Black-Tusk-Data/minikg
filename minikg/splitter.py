@@ -16,7 +16,7 @@ class Splitter:
         fragments: list[FileFragment] = []
         sanitized_path = str(path).replace("/", "_")
         lines: list[str]
-        with open(path) as f:
+        with open(self.config.input_dir / path) as f:
             lines = f.readlines()
             pass
 

@@ -1,14 +1,12 @@
 import logging
 import pickle
-from expert_llm.models import ChatBlock
-from expert_llm.remote.jina_ai_client import JinaAiClient
-from expert_llm.remote.openai_shaped_client_implementations import OpenAIApiClient
 
-from minikg import utils
 from sklearn.metrics.pairwise import cosine_similarity
 import networkx as nx
 
+from minikg import utils
 from minikg.models import GraphType, MiniKgConfig
+from minikg.services import services
 
 
 class GraphEdgeCompressor:
@@ -23,8 +21,6 @@ class GraphEdgeCompressor:
     ):
         self.config = config
         self.G = G
-        self.llm_client = OpenAIApiClient("gpt-4o")
-        self.embedding_client = JinaAiClient("jina-embeddings-v3")
         self.graph_cache = (
             self.config.persist_dir / f"compress-cache-v{self.config.version}"
         )
@@ -54,33 +50,26 @@ class GraphEdgeCompressor:
         between_node_names: tuple[str, str],
         edge_descriptions: list[str],
     ) -> str:
-        r = self.llm_client.chat_completion(
-            [
-                ChatBlock(
-                    role="system",
-                    content=f"You are a helpful {self.config.knowledge_domain} expert.",
-                ),
-                ChatBlock(
-                    role="user",
-                    content="\n".join(
+        r = services.llm_api.completion(
+            req_name="summarize_edges",
+            system=f"You are a helpful {self.config.knowledge_domain} expert.",
+            user="\n".join(
+                [
+                    " ".join(
                         [
-                            " ".join(
-                                [
-                                    "Summarize the relationship between",
-                                    between_node_names[0],
-                                    "and",
-                                    between_node_names[1],
-                                    "Given the following information about their relationship.",
-                                    "Your summary should be based ONLY upon the following information:",
-                                ]
-                            ),
-                            *edge_descriptions,
+                            "Summarize the relationship between",
+                            between_node_names[0],
+                            "and",
+                            between_node_names[1],
+                            "Given the following information about their relationship.",
+                            "Your summary should be based ONLY upon the following information:",
                         ]
                     ),
-                ),
-            ]
+                    *edge_descriptions,
+                ]
+            ),
         )
-        return r.content
+        return r.message
 
     def _copy_nodes(
         self,
@@ -124,7 +113,7 @@ class GraphEdgeCompressor:
                     **self.G.edges[u, v, idx],
                 )
                 continue
-            description_embeddings = self.embedding_client.embed(
+            description_embeddings = services.embedding_api.embed(
                 [self.G.edges[edge]["description"] for edge in uv_edges]
             )
             similarities = cosine_similarity(description_embeddings)
@@ -133,7 +122,7 @@ class GraphEdgeCompressor:
                 pairwise_similarities=similarities,
                 threshold_similarity=self.THRESHOLD_SIMILARITY,
             )
-            logging.info(
+            logging.debug(
                 "compressed %d edges into %d",
                 len(uv_edges),
                 len(clusters),
