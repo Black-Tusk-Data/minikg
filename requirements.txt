@@ -3,14 +3,14 @@ anytree==2.12.1
 asttokens==2.4.1
 autograd==1.7.0
 beartype==0.18.5
-btdcore==0.1.2
+git+https://github.com/Black-Tusk-Data/btdcore.git@v0.1.8
 certifi==2024.8.30
 charset-normalizer==3.4.0
 contourpy==1.3.0
 cycler==0.12.1
 decorator==5.1.1
 executing==2.1.0
-expert_llm @ file:///Users/liam/btd/expert_llm
+git+https://github.com/Black-Tusk-Data/expert_llm.git@v0.1.9
 fonttools==4.54.1
 future==1.0.0
 gensim==4.3.3
@@ -49,7 +49,6 @@ pyparsing==3.2.0
 pyright==1.1.388
 python-dateutil==2.9.0.post0
 pytz==2024.2
-pyvis==0.3.2
 requests==2.32.3
 scikit-learn==1.5.2
 scipy==1.12.0
