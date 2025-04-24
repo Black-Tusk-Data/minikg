@@ -18,7 +18,7 @@ class KgApiCode:
         local_dir: str = "",
         ignore_file_exps: list[str],
         input_file_exps: list[str],
-    ):
+    ) -> MiniKgConfig:
         if not any([github_url, local_dir]):
             raise Exception("expected one of 'github_url' or 'local_dir'")
         input_dir = local_dir if local_dir else str(self._clone_github_url(github_url))
@@ -30,7 +30,7 @@ class KgApiCode:
             input_file_exps=input_file_exps,
         )
         minikgapi.build_kg()
-        return
+        return minikgapi.config
 
     def load_kg_package(
         self,
