@@ -71,7 +71,7 @@ class StepCoordinator_ClusterGroups(StepCoordinator):
     ) -> list[Step_ClusterGroups]:
         last_step = executed_steps_this_coordinator[-1]
         last_step_groups = last_step.get_output().groups
-        if len(last_step_groups) == 1:
+        if len(last_step_groups) <= 1:
             return []
         return [
             Step_ClusterGroups(

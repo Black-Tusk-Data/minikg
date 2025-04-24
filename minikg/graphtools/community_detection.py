@@ -35,6 +35,9 @@ class CommunityDetectorLeiden(CommunityDetector):
     def get_communities(self, G: nx.MultiGraph) -> list[Community]:
         from graspologic.partition import hierarchical_leiden, HierarchicalCluster
 
+        if not G.nodes:
+            return []
+
         # leiden doesn't like multigraphs
         flat_G = flatten_multigraph(G)
 

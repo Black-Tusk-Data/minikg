@@ -98,6 +98,11 @@ class Step_ClusterGroups(MiniKgBuilderStep[BuildStepOutput_Groups]):
         return summaries
 
     def _execute(self) -> BuildStepOutput_Groups:
+        if not self.groups:
+            return BuildStepOutput_Groups(
+                groups=[],
+            )
+
         group_strings = {
             group.group_id: self._get_string_for_semantic_comparison(group)
             for group in self.groups
